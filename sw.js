@@ -1,5 +1,5 @@
 /* 電波がなくても使えるようにするしくみ。ファイルを直したら VERSION を上げる */
-const VERSION = "2026-11-16c";
+const VERSION = "2026-11-16d";
 const CACHE = "rikasansu-" + VERSION;
 const SHELL = ["./", "index.html", "manifest.webmanifest", "css/common.css", "js/common.js",
   "icons/icon-180.png", "icons/icon-192.png", "icons/icon-512.png", "icons/icon-maskable-512.png",
