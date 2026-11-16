@@ -1,0 +1,392 @@
+<!doctype html>
+<html lang="ja" data-root="../">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#edf0f5" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0d1221" media="(prefers-color-scheme: dark)">
+<title>動く点とグラフ｜理科・算数ラボ</title>
+<link rel="manifest" href="../manifest.webmanifest">
+<link rel="icon" href="../icons/icon-192.png">
+<link rel="apple-touch-icon" href="../icons/icon-180.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=Zen+Maru+Gothic:wght@700;900&display=swap">
+<link rel="stylesheet" href="../css/common.css">
+<style>
+:root{--p1:#3f7ee0;--p2:#9a5fd6;--ok:#2e9a5f;--ng:#c8502d;--grid:#e3e8f0}
+@media (prefers-color-scheme: dark){:root{--p1:#7aa7f2;--p2:#bf93ee;--ok:#5cc98e;--ng:#f0906f;--grid:#243049}}
+/* 図とグラフ（上に固定） */
+.figs{flex:0 0 auto;height:min(54dvh,125vw);margin:0 10px;display:flex;flex-direction:column;gap:6px}
+.figs[hidden]{display:none}
+.fig{display:block;width:100%;min-height:0;border-radius:10px;background:var(--surface2);border:1px solid var(--line)}
+#fig1,#gr1{flex:1 1 0}
+#fig2{flex:17 1 0}#gr2{flex:28 1 0}
+.fig .ts{font-size:16px}.fig .ta{font-size:15px}.fig .tv{font-size:21px}
+svg text{font-family:var(--f-body);font-variant-numeric:tabular-nums}
+.playrow{display:flex;gap:8px;align-items:center}
+.playrow input{flex:1;min-width:0}
+.tick{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin:-6px 2px 0;font-variant-numeric:tabular-nums}
+.mini{display:flex;gap:4px 12px;flex-wrap:wrap;font-size:15px;font-variant-numeric:tabular-nums}
+.mini b{font-family:var(--f-head);font-size:18px;color:var(--accent-ink)}
+.mini .k{color:var(--muted);font-size:13px}
+.ctlbox[hidden]{display:none}
+.seg button{padding:0 4px;font-size:15px}
+.dot{display:inline-block;width:.8em;height:.8em;border-radius:50%;vertical-align:-1px;margin-right:3px}
+.d1{background:var(--p1)}.d2{background:var(--p2)}
+.now{background:var(--surface2);border-radius:10px;padding:8px 10px;font-size:15px;line-height:1.8;font-variant-numeric:tabular-nums}
+.now b{font-family:var(--f-head);font-size:17px;color:var(--accent-ink)}
+.why p{margin:0 0 6px}.why p:last-child{margin:0}
+.btn[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+[hidden]{display:none!important}
+@media (min-width:820px) and (min-height:500px){.figs{grid-area:stage;height:auto;margin:0 10px 16px}}
+</style>
+</head>
+<body>
+<div id="app">
+  <header class="topbar">
+    <a class="backbtn" href="../">＜ メニュー</a>
+    <h1>動く点とグラフ</h1>
+  </header>
+
+  <section class="figs" id="figs1" aria-label="図形とグラフ">
+    <svg class="fig" id="fig1" viewBox="0 0 420 300" role="img" aria-label="図形と動く点P"></svg>
+    <svg class="fig" id="gr1" viewBox="0 0 420 280" role="img" aria-label="時間と面積のグラフ"></svg>
+  </section>
+  <section class="figs" id="figs2" aria-label="道とグラフ" hidden>
+    <svg class="fig" id="fig2" viewBox="0 0 420 170" role="img" aria-label="家と学校の間の道と2人"></svg>
+    <svg class="fig" id="gr2" viewBox="0 0 420 280" role="img" aria-label="時間と道のりのグラフ"></svg>
+  </section>
+
+  <section class="status">
+    <div class="ctlbox" id="st1">
+      <div class="playrow"><button class="play" id="play1">▶ うごかす</button><input type="range" id="rng1" min="0" step="0.1" aria-label="時間"></div>
+      <div class="tick" id="tick1"></div>
+      <div class="mini"><span><span class="k">時間</span> <b id="s1t"></b></span><span><span class="k">進んだ長さ</span> <b id="s1d"></b></span><span><span class="k" id="s1ak">面積</span> <b id="s1a"></b></span></div>
+    </div>
+    <div class="ctlbox" id="st2" hidden>
+      <div class="playrow"><button class="play" id="play2">▶ うごかす</button><input type="range" id="rng2" min="0" step="0.1" aria-label="時間"></div>
+      <div class="tick" id="tick2"></div>
+      <div class="mini"><span><span class="k" id="s2tk">時間</span> <b id="s2t"></b></span><span><span class="dot d1"></span><span class="k">兄</span> <b id="s2a"></b></span><span><span class="dot d2"></span><span class="k">弟</span> <b id="s2b"></b></span><span><span class="k">2人の間</span> <b id="s2g"></b></span></div>
+    </div>
+  </section>
+
+  <div class="tabs" role="tablist" aria-label="モード">
+    <button role="tab" data-pane="p1">① 点Pの動き</button>
+    <button role="tab" data-pane="p2">② 2人の動き</button>
+  </div>
+
+  <!-- ① -->
+  <div class="pane" id="p1" role="tabpanel">
+    <section class="panel">
+      <h2 id="t1title"></h2>
+      <div class="grid3"><button class="btn" data-step1="-1">◀ 1秒</button><button class="btn" data-step1="1">1秒 ▶</button><button class="btn" data-step1="0">最初へ</button></div>
+      <button class="btn" id="trace1" aria-pressed="false">グラフを動いたところまでかく（予想してから見る）</button>
+      <div class="now" id="now1"></div>
+      <div class="why"><b>なぜ？</b><div id="why1"></div></div>
+    </section>
+    <section class="panel">
+      <h2>設定</h2>
+      <div class="lbl">図形</div>
+      <div class="seg" id="shape1"><button data-v="rect" aria-pressed="true">長方形</button><button data-v="trap" aria-pressed="false">直角台形</button></div>
+      <div class="lbl">面積を調べる三角形</div>
+      <div class="seg" id="tri1"><button data-v="AB" aria-pressed="true">三角形ABP</button><button data-v="AD" aria-pressed="false">三角形APD</button></div>
+      <div id="rectSize">
+        <div class="lbl">たて（辺AB）</div>
+        <div class="seg" id="ab1"><button data-v="4">4cm</button><button data-v="6" aria-pressed="true">6cm</button><button data-v="8">8cm</button></div>
+        <div class="lbl" style="margin-top:10px">横（辺BC）</div>
+        <div class="seg" id="bc1"><button data-v="8">8cm</button><button data-v="10" aria-pressed="true">10cm</button><button data-v="12">12cm</button></div>
+      </div>
+      <div class="lbl">点Pの速さ</div>
+      <div class="seg" id="sp1"><button data-v="1" aria-pressed="true">毎秒1cm</button><button data-v="2" aria-pressed="false">毎秒2cm</button><button data-v="3" aria-pressed="false">毎秒3cm</button></div>
+      <p class="hint">点PはBを出発して、B→C→D→Aの順に辺の上を動き、Aで止まります。グラフの点線は、Pが頂点（C・D・A）に着いた時刻です。</p>
+    </section>
+  </div>
+
+  <!-- ② -->
+  <div class="pane" id="p2" role="tabpanel" hidden>
+    <section class="panel">
+      <h2 id="t2title"></h2>
+      <div class="lbl">グラフ</div>
+      <div class="seg" id="gm2"><button data-v="dia" aria-pressed="true">家からの道のり</button><button data-v="gap" aria-pressed="false">2人の間のきょり</button></div>
+      <div class="why"><b>計算で求めると</b><div id="why2"></div></div>
+    </section>
+    <section class="panel">
+      <h2>設定</h2>
+      <div class="lbl">場面</div>
+      <div class="seg" id="sc2"><button data-v="meet" aria-pressed="true">向かい合って出会う</button><button data-v="catch" aria-pressed="false">同じ向きで追いつく</button></div>
+      <div class="lbl"><span class="dot d1"></span>兄の速さ（分速）</div>
+      <div class="seg" id="a2"><button data-v="60">60m</button><button data-v="75">75m</button><button data-v="90" aria-pressed="true">90m</button><button data-v="100">100m</button></div>
+      <div class="lbl"><span class="dot d2"></span>弟の速さ（分速）</div>
+      <div class="seg" id="b2"><button data-v="40">40m</button><button data-v="50">50m</button><button data-v="60" aria-pressed="true">60m</button><button data-v="75">75m</button></div>
+      <div class="lbl">弟が先に出発する時間</div>
+      <div class="seg" id="d2"><button data-v="0" aria-pressed="true">同時</button><button data-v="3">3分</button><button data-v="5">5分</button><button data-v="8">8分</button></div>
+      <p class="hint" id="hint2"></p>
+    </section>
+  </div>
+</div>
+<div id="update" class="update" hidden><span>新しい版があります。</span><button id="updateBtn" type="button">開き直す</button></div>
+<script src="../js/common.js"></script>
+<script>
+// ※ 計算・図・説明文は「動く点とグラフラボ.html」（①②）と同じ。③問題は入れない
+(function(){
+"use strict";
+var $=function(id){return document.getElementById(id);};
+var NS="http://www.w3.org/2000/svg";
+var RATE=2.5; // 1秒間に進むシミュレーションの時間（秒または分）
+
+/* ---------- 数の表示 ---------- */
+function gcd(a,b){a=Math.abs(a);b=Math.abs(b);while(b){var t=a%b;a=b;b=t;}return a;}
+function frac(p,q){var g=gcd(p,q);p/=g;q/=g;var w=Math.floor(p/q),r=p-w*q;return (w?w+"と":"")+r+"/"+q;}
+function num(x){var r=Math.round(x*100)/100;if(Math.abs(x-r)<1e-6)return String(+r.toFixed(2));
+  for(var q=3;q<=48;q++){var p=Math.round(x*q);if(Math.abs(x*q-p)<1e-7)return frac(p,q);}return "約"+(+x.toFixed(1));}
+function nice(x){return Math.abs(x*100-Math.round(x*100))<1e-6;}
+function rnd(n){return Math.floor(Math.random()*n);}
+function pick(a){return a[rnd(a.length)];}
+function el(svg,t,a,txt){var e=document.createElementNS(NS,t);for(var k in a)e.setAttribute(k,a[k]);if(txt!=null)e.textContent=txt;svg.appendChild(e);return e;}
+function clear(svg){while(svg.firstChild)svg.removeChild(svg.firstChild);}
+
+/* =========================================================
+   点Pのモデル
+   ========================================================= */
+/* 頂点：A 左上、B 左下、C 右下、D 右上（cm） */
+function makeShape(kind,ab,bc){
+  var V=kind==="trap"?{A:[0,8],B:[0,0],C:[12,0],D:[6,8]}:{A:[0,ab],B:[0,0],C:[bc,0],D:[bc,ab]};
+  return {kind:kind,V:V,nm:kind==="trap"?"直角台形":"長方形"};
+}
+function dist(a,b){return Math.hypot(a[0]-b[0],a[1]-b[1]);}
+function makeModel(shape,tri,sp){
+  var R=["B","C","D","A"],segs=[],t0=0,d0=0;
+  for(var i=0;i<3;i++){var a=shape.V[R[i]],b=shape.V[R[i+1]],l=dist(a,b);segs.push({from:R[i],to:R[i+1],a:a,b:b,len:l,d0:d0,t0:t0,t1:t0+l/sp});d0+=l;t0+=l/sp;}
+  var m={shape:shape,tri:tri,sp:sp,segs:segs,T:t0,total:d0};
+  m.X=shape.V.A;m.Y=shape.V[tri==="AB"?"B":"D"];
+  m.triName=tri==="AB"?"三角形ABP":"三角形APD";
+  m.baseName=tri==="AB"?"AB":"AD";
+  m.base=dist(m.X,m.Y);
+  return m;
+}
+function segAt(m,t){for(var i=0;i<m.segs.length;i++)if(t<=m.segs[i].t1+1e-9)return m.segs[i];return m.segs[m.segs.length-1];}
+function posAt(m,t){t=Math.max(0,Math.min(m.T,t));var s=segAt(m,t),u=(t-s.t0)/(s.t1-s.t0);return [s.a[0]+(s.b[0]-s.a[0])*u,s.a[1]+(s.b[1]-s.a[1])*u];}
+function heightAt(m,P){var X=m.X,Y=m.Y,cx=(Y[0]-X[0])*(P[1]-X[1])-(Y[1]-X[1])*(P[0]-X[0]);return Math.abs(cx)/m.base;}
+function areaAt(m,t){var P=posAt(m,t);return m.base*heightAt(m,P)/2;}
+function breaks(m){var b=[0];m.segs.forEach(function(s){b.push(s.t1);});return b;}
+
+/* ---------- 図形の図 ---------- */
+function drawShape(svg,m,t,opt){
+  opt=opt||{};clear(svg);
+  var V=m.shape.V,xs=[],ys=[];for(var k in V){xs.push(V[k][0]);ys.push(V[k][1]);}
+  var W=420,H=300,mg=46,w=Math.max.apply(0,xs),h=Math.max.apply(0,ys),sc=Math.min((W-2*mg)/w,(H-2*mg)/h);
+  var ox=(W-w*sc)/2,oy=(H+h*sc)/2;
+  var S=function(p){return [ox+p[0]*sc,oy-p[1]*sc];};
+  // 1cmごとの方眼
+  for(var i=0;i<=w;i++)el(svg,"line",{x1:ox+i*sc,y1:oy,x2:ox+i*sc,y2:oy-h*sc,stroke:"var(--grid)","stroke-width":1});
+  for(i=0;i<=h;i++)el(svg,"line",{x1:ox,y1:oy-i*sc,x2:ox+w*sc,y2:oy-i*sc,stroke:"var(--grid)","stroke-width":1});
+  var ord=["A","B","C","D"],pts=ord.map(function(n){return S(V[n]).join(",");}).join(" ");
+  var P=posAt(m,t),showP=!opt.noP;
+  if(showP){var tri=[m.X,m.Y,P].map(function(p){return S(p).join(",");}).join(" ");
+    el(svg,"polygon",{points:tri,fill:"var(--accent)","fill-opacity":.28,stroke:"var(--accent)","stroke-width":2,"stroke-linejoin":"round"});}
+  el(svg,"polygon",{points:pts,fill:"none",stroke:"var(--ink)","stroke-width":2.5,"stroke-linejoin":"round"});
+  // 進んだ道
+  if(showP&&t>0){var d="M"+S(V.B).join(",");m.segs.forEach(function(s){if(t>=s.t1)d+=" L"+S(s.b).join(",");else if(t>s.t0)d+=" L"+S(P).join(",");});
+    el(svg,"path",{d:d,fill:"none",stroke:"var(--accent)","stroke-width":6,"stroke-linecap":"round","stroke-linejoin":"round","stroke-opacity":.75});}
+  // 辺の長さ
+  var cen=[w/2,h/2];
+  [["A","B"],["B","C"],["C","D"],["D","A"]].forEach(function(e){
+    var a=V[e[0]],b=V[e[1]],mx=(a[0]+b[0])/2,my=(a[1]+b[1])/2,nx=b[1]-a[1],ny=-(b[0]-a[0]),l=Math.hypot(nx,ny);nx/=l;ny/=l;
+    if((mx-cen[0])*nx+(my-cen[1])*ny<0){nx=-nx;ny=-ny;}
+    var q=S([mx+nx*0.1,my+ny*0.1]),name=e[0]+e[1],hide=opt.hide&&opt.hide.indexOf(name)>=0;
+    el(svg,"text",{"class":"ts",x:q[0]+nx*18,y:q[1]-ny*18+5,"text-anchor":"middle","font-size":14,fill:hide?"var(--ng)":"var(--muted)","font-weight":hide?700:400},hide?"？cm":num(dist(a,b))+"cm");
+  });
+  // 頂点
+  ord.forEach(function(n){var p=V[n],dx=p[0]-cen[0],dy=p[1]-cen[1],l=Math.hypot(dx,dy)||1,q=S(p);
+    el(svg,"text",{"class":"tv",x:q[0]+dx/l*18,y:q[1]-dy/l*18+6,"text-anchor":"middle","font-size":18,"font-weight":700,fill:"var(--ink)"},n);});
+  if(m.shape.kind==="trap"){[["B",1,1],["A",1,-1]].forEach(function(r){var q=S(m.shape.V[r[0]]);el(svg,"path",{d:"M"+(q[0]+10)+","+q[1]+" l0,"+(-10*r[2])+" l-10,0",fill:"none",stroke:"var(--muted)","stroke-width":1.2,transform:"translate(0,0)"});});}
+  if(showP){
+    // 高さ（Pから底辺をふくむ直線への垂線）
+    var X=m.X,Y=m.Y,ux=(Y[0]-X[0])/m.base,uy=(Y[1]-X[1])/m.base,tt=(P[0]-X[0])*ux+(P[1]-X[1])*uy,F=[X[0]+ux*tt,X[1]+uy*tt],hh=heightAt(m,P);
+    if(hh>1e-6){var a1=S(P),b1=S(F);el(svg,"line",{x1:a1[0],y1:a1[1],x2:b1[0],y2:b1[1],stroke:"var(--focus)","stroke-width":2,"stroke-dasharray":"6 4"});
+      var mx=(a1[0]+b1[0])/2,my=(a1[1]+b1[1])/2,horiz=Math.abs(a1[1]-b1[1])<1,right=mx>S(cen)[0];
+      if(right&&mx+44>W)right=false;if(!right&&mx-44<0)right=true;
+      el(svg,"text",{"class":"ta",x:mx+(horiz?0:(right?7:-7)),y:my+(horiz?-8:5),"text-anchor":horiz?"middle":(right?"start":"end"),"font-size":14,fill:"var(--focus)","font-weight":700},"高さ");}
+    var p=S(P);el(svg,"circle",{cx:p[0],cy:p[1],r:8,fill:"var(--accent)",stroke:"var(--surface)","stroke-width":2});
+    var dx=P[0]-cen[0],dy=P[1]-cen[1],l=Math.hypot(dx,dy)||1;
+    el(svg,"text",{"class":"tv",x:p[0]+dx/l*20,y:p[1]-dy/l*20+6,"text-anchor":"middle","font-size":17,"font-weight":900,fill:"var(--accent-ink)"},"P");
+  }
+}
+
+/* ---------- 目もりの幅を決める ---------- */
+function niceStep(max,n){var raw=max/n,p=Math.pow(10,Math.floor(Math.log10(raw))),c=[1,2,2.5,5,10];for(var i=0;i<c.length;i++)if(c[i]*p>=raw)return c[i]*p;return 10*p;}
+/* 折れ線のグラフ
+   o={xmax,ymax,xlab,ylab,xunit,yunit,lines:[{pts,col,upto}],cur:[{x,y,col}],marks:[x...],markLab:[..],hl:{x,y,lab}} */
+function drawGraph(svg,o){
+  clear(svg);var W=420,H=280,L=52,R=16,T=30,B=40,gw=W-L-R,gh=H-T-B;
+  var xs=niceStep(o.xmax,8),ys=niceStep(o.ymax,6),xm=Math.ceil(o.xmax/xs-1e-9)*xs,ym=Math.ceil(o.ymax*1.08/ys-1e-9)*ys;
+  var X=function(v){return L+v/xm*gw;},Y=function(v){return T+gh-v/ym*gh;};
+  for(var v=0;v<=xm+1e-9;v+=xs){el(svg,"line",{x1:X(v),y1:T,x2:X(v),y2:T+gh,stroke:"var(--grid)"});if(!o.noXnum)el(svg,"text",{"class":"ts",x:X(v),y:T+gh+16,"text-anchor":"middle","font-size":12,fill:"var(--muted)"},num(v));}
+  for(v=0;v<=ym+1e-9;v+=ys){el(svg,"line",{x1:L,y1:Y(v),x2:L+gw,y2:Y(v),stroke:"var(--grid)"});if(!o.noYnum)el(svg,"text",{"class":"ts",x:L-6,y:Y(v)+4,"text-anchor":"end","font-size":12,fill:"var(--muted)"},num(v));}
+  el(svg,"line",{x1:L,y1:T+gh,x2:L+gw+6,y2:T+gh,stroke:"var(--ink)","stroke-width":1.5});
+  el(svg,"line",{x1:L,y1:T+gh,x2:L,y2:T-6,stroke:"var(--ink)","stroke-width":1.5});
+  el(svg,"text",{"class":"ts",x:L+gw,y:H-6,"text-anchor":"end","font-size":12.5,fill:"var(--ink)","font-weight":700},o.xlab);
+  el(svg,"text",{"class":"ts",x:L-4,y:14,"text-anchor":"start","font-size":12.5,fill:"var(--ink)","font-weight":700},o.ylab);
+  (o.marks||[]).forEach(function(mk){el(svg,"line",{x1:X(mk.x),y1:T,x2:X(mk.x),y2:T+gh,stroke:"var(--muted)","stroke-dasharray":"4 4"});
+    if(mk.lab)el(svg,"text",{"class":"ta",x:X(mk.x),y:T+14,"text-anchor":"middle","font-size":12.5,"font-weight":700,fill:"var(--muted)",stroke:"var(--surface2)","stroke-width":5,"paint-order":"stroke"},mk.lab);});
+  (o.ymarks||[]).forEach(function(mk){el(svg,"line",{x1:L,y1:Y(mk.y),x2:L+gw,y2:Y(mk.y),stroke:"var(--muted)","stroke-dasharray":"4 4"});
+    el(svg,"text",{"class":"ta",x:L+4,y:Y(mk.y)-4,"font-size":11.5,"font-weight":700,fill:"var(--accent-ink)"},mk.lab);});
+  (o.lines||[]).forEach(function(ln){var pts=ln.pts.slice();
+    if(ln.upto!=null){var out=[];for(var i=0;i<pts.length;i++){if(pts[i][0]<=ln.upto)out.push(pts[i]);else{if(i>0){var a=pts[i-1],b=pts[i],u=(ln.upto-a[0])/(b[0]-a[0]);if(u>0)out.push([ln.upto,a[1]+(b[1]-a[1])*u]);}break;}}pts=out;}
+    if(pts.length>1)el(svg,"polyline",{points:pts.map(function(p){return X(p[0])+","+Y(p[1]);}).join(" "),fill:"none",stroke:ln.col,"stroke-width":3,"stroke-linejoin":"round","stroke-linecap":"round"});
+    (ln.dots||[]).forEach(function(p){el(svg,"circle",{cx:X(p[0]),cy:Y(p[1]),r:3.5,fill:ln.col});});});
+  (o.xlabs||[]).forEach(function(xl){el(svg,"text",{"class":"ts",x:X(xl.x),y:T+gh+16,"text-anchor":"middle","font-size":12,"font-weight":700,fill:"var(--accent-ink)"},xl.t);});
+  (o.ylabs||[]).forEach(function(yl){el(svg,"text",{"class":"ts",x:L-6,y:Y(yl.y)+4,"text-anchor":"end","font-size":12,"font-weight":700,fill:"var(--accent-ink)"},yl.t);
+    el(svg,"line",{x1:L,y1:Y(yl.y),x2:X(yl.x||0),y2:Y(yl.y),stroke:"var(--muted)","stroke-dasharray":"3 4"});});
+  if(o.hl){el(svg,"circle",{cx:X(o.hl.x),cy:Y(o.hl.y),r:9,fill:"none",stroke:"var(--ink)","stroke-width":2});
+    el(svg,"text",{"class":"ta",x:X(o.hl.x),y:Y(o.hl.y)-14,"text-anchor":"middle","font-size":12.5,"font-weight":700,fill:"var(--ink)"},o.hl.lab);}
+  (o.cur||[]).forEach(function(c){el(svg,"line",{x1:X(c.x),y1:T,x2:X(c.x),y2:T+gh,stroke:"var(--accent)","stroke-width":1.5,"stroke-opacity":.6});
+    el(svg,"circle",{cx:X(c.x),cy:Y(c.y),r:7,fill:c.col,stroke:"var(--surface)","stroke-width":2});});
+}
+function areaLine(m){return breaks(m).map(function(t){return [t,areaAt(m,t)];});}
+
+/* =========================================================
+   ① 動かして調べる
+   ========================================================= */
+var S1={shape:"rect",ab:6,bc:10,tri:"AB",sp:1,t:0,trace:false},M1=null,playing=0,lastTs=0;
+function build1(){M1=makeModel(makeShape(S1.shape,S1.ab,S1.bc),S1.tri,S1.sp);S1.t=Math.min(S1.t,M1.T);
+  var r=$("rng1");r.max=M1.T;r.value=S1.t;
+  $("tick1").innerHTML=breaks(M1).map(function(t,i){return "<span>"+num(t)+"秒"+(i?"":"")+"</span>";}).join("");
+  $("rectSize").hidden=S1.shape!=="rect";draw1();}
+function draw1(){
+  var m=M1,t=S1.t,s=segAt(m,t),P=posAt(m,t),a=areaAt(m,t),h=heightAt(m,P);
+  $("t1title").textContent=m.shape.nm+"ABCD と "+m.triName;
+  drawShape($("fig1"),m,t);
+  var br=breaks(m),line=areaLine(m),maxA=Math.max.apply(0,line.map(function(p){return p[1];}));
+  drawGraph($("gr1"),{xmax:m.T,ymax:Math.max(maxA,1),xlab:"時間（秒）",ylab:"面積（cm²）",
+    lines:[{pts:line,col:"var(--accent)",upto:S1.trace?t:null}],cur:[{x:t,y:a,col:"var(--accent)"}],
+    marks:br.slice(1).map(function(x,i){return {x:x,lab:m.segs[i].to};})});
+  $("s1t").innerHTML=num(t)+"<small>秒</small>";$("s1d").innerHTML=num(m.sp*t)+"<small>cm</small>";
+  $("s1ak").textContent=m.triName+"の面積";$("s1a").innerHTML=num(a)+"<small>cm²</small>";
+  var edge="辺"+s.from+s.to,slope=(areaAt(m,s.t1)-areaAt(m,s.t0))/(s.t1-s.t0);
+  var at=t>=m.T-1e-9?"Aに着いて止まりました":(Math.abs(t-s.t0)<1e-9&&t>0?s.from+"に着いたところ（ここから"+edge+"）":"Pは今 <b>"+edge+"</b> の上");
+  $("now1").innerHTML=at+"<br>面積 ＝ 底辺 "+m.baseName+"（"+num(m.base)+"cm）× 高さ（"+num(h)+"cm）÷ 2 ＝ <b>"+num(a)+"</b>cm²";
+  var w="<p>"+m.triName+"の<b>底辺を"+m.baseName+"</b>とすると、高さは「Pから辺"+m.baseName+"（またはそれをのばした線）までのきょり」です。</p>";
+  if(Math.abs(slope)<1e-9)w+="<p>Pが"+edge+"を動くあいだは、"+edge+"が辺"+m.baseName+"と<b>平行</b>なので、高さが変わりません。だから面積も変わらず、<b>グラフは水平</b>になります。</p>";
+  else w+="<p>Pが"+edge+"を動くあいだは、高さが一定の割合で"+(slope>0?"増える":"減る")+"ので、面積は<b>1秒に"+num(Math.abs(slope))+"cm²ずつ"+(slope>0?"増え":"減り")+"</b>ます。グラフは"+(slope>0?"右上がり":"右下がり")+"の直線です。</p>";
+  w+="<p>グラフが折れ曲がるのは、Pが<b>頂点に着いたとき</b>（"+br.slice(1,3).map(function(x,i){return m.segs[i].to+"："+num(x)+"秒";}).join("、")+"）です。</p>";
+  $("why1").innerHTML=w;
+  $("rng1").value=t;
+}
+function seg1(id,key,cast){$(id).addEventListener("click",function(e){var b=e.target.closest("button");if(!b)return;S1[key]=cast(b.dataset.v);
+  [].forEach.call(this.children,function(x){x.setAttribute("aria-pressed",String(x===b));});stop();S1.t=0;build1();});}
+seg1("shape1","shape",String);seg1("tri1","tri",String);seg1("ab1","ab",Number);seg1("bc1","bc",Number);seg1("sp1","sp",Number);
+$("rng1").addEventListener("input",function(){stop();S1.t=+this.value;draw1();});
+[].forEach.call(document.querySelectorAll("[data-step1]"),function(b){b.onclick=function(){stop();var d=+b.dataset.step1;S1.t=d===0?0:Math.max(0,Math.min(M1.T,Math.round(S1.t)+d));draw1();};});
+$("trace1").onclick=function(){S1.trace=!S1.trace;this.setAttribute("aria-pressed",String(S1.trace));draw1();};
+
+/* ---------- 再生 ---------- */
+function stop(){playing=0;$("play1").textContent="▶ うごかす";$("play2").textContent="▶ うごかす";}
+function start(which){playing=which;lastTs=0;$("play"+which).textContent="❚❚ とめる";requestAnimationFrame(loop);}
+function loop(ts){if(!playing)return;var dt=lastTs?(ts-lastTs)/1000:0;lastTs=ts;
+  if(playing===1){S1.t=Math.min(M1.T,S1.t+dt*RATE);draw1();if(S1.t>=M1.T){stop();return;}}
+  else{S2.t=Math.min(M2.T,S2.t+dt*RATE);draw2();if(S2.t>=M2.T){stop();return;}}
+  requestAnimationFrame(loop);}
+$("play1").onclick=function(){if(playing){stop();return;}if(S1.t>=M1.T-1e-9)S1.t=0;start(1);};
+$("play2").onclick=function(){if(playing){stop();return;}if(S2.t>=M2.T-1e-9)S2.t=0;start(2);};
+
+/* =========================================================
+   ② 2人の動き（弟が時刻0に出発、兄は d 分後に出発）
+   ========================================================= */
+var DIST=1800,S2={sc:"meet",a:90,b:60,d:0,t:0,gm:"dia"},M2=null;
+function makeTwo(sc,a,b,d){
+  var m={sc:sc,a:a,b:b,d:d,D:DIST};
+  m.endA=d+DIST/a;m.endB=DIST/b;m.T=Math.max(m.endA,m.endB);
+  m.posA=function(t){return t<=d?0:Math.min(DIST,a*(t-d));};                                    // 兄：家→学校
+  m.posB=sc==="meet"?function(t){return Math.max(0,DIST-b*t);}:function(t){return Math.min(DIST,b*t);}; // 弟
+  if(sc==="meet"){m.ev=(DIST+a*d)/(a+b);m.evOk=m.ev>=d&&m.ev<=Math.min(m.endA,m.endB)+1e-9;}
+  else{if(a>b){m.ev=a*d/(a-b);m.evOk=m.ev>d&&a*(m.ev-d)<=DIST+1e-9;}else{m.ev=null;m.evOk=false;}}
+  if(m.evOk)m.evPos=m.posA(m.ev);
+  return m;
+}
+function breaks2(m){var b=[0,m.d,m.endA,m.endB];if(m.evOk)b.push(m.ev);b=b.filter(function(x){return x>=0&&x<=m.T;}).sort(function(x,y){return x-y;});
+  return b.filter(function(x,i){return i===0||x-b[i-1]>1e-9;});}
+function build2(){M2=makeTwo(S2.sc,S2.a,S2.b,S2.d);S2.t=Math.min(S2.t,M2.T);var r=$("rng2");r.max=M2.T;r.value=S2.t;
+  $("tick2").innerHTML="<span>0分</span><span>"+num(M2.T)+"分</span>";
+  $("hint2").textContent=S2.sc==="meet"?"兄は家から学校へ、弟は学校から家へ向かいます。家から学校までは1800mです。":"兄も弟も、家から学校へ向かいます。家から学校までは1800mです。";
+  draw2();}
+function drawRoad(svg,m,t,opt){
+  opt=opt||{};clear(svg);var L=74,R=346,Y=112,X=function(v){return L+v/DIST*(R-L);};
+  el(svg,"line",{x1:L,y1:Y,x2:R,y2:Y,stroke:"var(--line)","stroke-width":10,"stroke-linecap":"round"});
+  // 目もりは500mごと（1800mの学校の手前の1500mまで）
+  for(var v=0;v<DIST;v+=500){el(svg,"line",{x1:X(v),y1:Y+8,x2:X(v),y2:Y+14,stroke:"var(--muted)"});el(svg,"text",{"class":"ts",x:X(v),y:Y+30,"text-anchor":"middle","font-size":12,fill:"var(--muted)"},v+"m");}
+  el(svg,"text",{"class":"tv",x:L-16,y:Y+7,"text-anchor":"end","font-size":16,"font-weight":700,fill:"var(--ink)"},"家");
+  el(svg,"text",{"class":"tv",x:R+16,y:Y+7,"text-anchor":"start","font-size":16,"font-weight":700,fill:"var(--ink)"},"学校");
+  el(svg,"text",{"class":"ts",x:R+16,y:Y+30,"text-anchor":"start","font-size":12,fill:"var(--muted)"},"1800m");
+  if(opt.static)return;
+  var pa=m.posA(t),pb=m.posB(t),close=Math.abs(X(pa)-X(pb))<34;
+  // 2人の間
+  if(Math.abs(pa-pb)>1){var y0=30;el(svg,"line",{x1:X(pa),y1:y0,x2:X(pb),y2:y0,stroke:"var(--accent)","stroke-width":2});
+    [pa,pb].forEach(function(p){el(svg,"line",{x1:X(p),y1:y0-6,x2:X(p),y2:y0+6,stroke:"var(--accent)","stroke-width":2});});
+    el(svg,"text",{"class":"ta",x:Math.max(40,Math.min(380,(X(pa)+X(pb))/2)),y:y0-10,"text-anchor":"middle","font-size":13,"font-weight":700,fill:"var(--accent-ink)"},num(Math.abs(pa-pb))+"m");}
+  [[pb,"var(--p2)","弟",close?Y-56:Y-22],[pa,"var(--p1)","兄",Y-22]].forEach(function(q){
+    var x=X(q[0]),yy=q[3];
+    el(svg,"circle",{cx:x,cy:yy,r:15,fill:q[1],stroke:"var(--surface)","stroke-width":2});
+    el(svg,"text",{x:x,y:yy+5.5,"text-anchor":"middle","font-size":15,"font-weight":700,fill:"#fff"},q[2]);});
+}
+function draw2(){
+  var m=M2,t=S2.t,pa=m.posA(t),pb=m.posB(t);
+  $("t2title").textContent=m.sc==="meet"?"向かい合って出会う":"同じ向きで追いつく";
+  drawRoad($("fig2"),m,t);
+  var br=breaks2(m),marks=[];
+  if(m.d>0)marks.push({x:m.d,lab:"兄が出発"});
+  var hl=null;
+  if(S2.gm==="dia"){
+    var la=[[0,0]];if(m.d>0)la.push([m.d,0]);la.push([m.endA,DIST]);if(m.endA<m.T)la.push([m.T,DIST]);
+    var lb=m.sc==="meet"?[[0,DIST],[m.endB,0]]:[[0,0],[m.endB,DIST]];if(m.endB<m.T)lb.push([m.T,m.sc==="meet"?0:DIST]);
+    if(m.evOk)hl={x:m.ev,y:m.evPos,lab:(m.sc==="meet"?"出会う":"追いつく")+"（"+num(m.ev)+"分）"};
+    drawGraph($("gr2"),{xmax:m.T,ymax:DIST,xlab:"時間（分）",ylab:"家からの道のり（m）",
+      lines:[{pts:la,col:"var(--p1)"},{pts:lb,col:"var(--p2)"}],cur:[{x:t,y:pa,col:"var(--p1)"},{x:t,y:pb,col:"var(--p2)"}],marks:marks,hl:hl});
+  }else{
+    var pts=br.map(function(x){return [x,Math.abs(m.posA(x)-m.posB(x))];}),mx=Math.max.apply(0,pts.map(function(p){return p[1];}));
+    if(m.evOk)hl={x:m.ev,y:0,lab:(m.sc==="meet"?"出会う":"追いつく")+"（"+num(m.ev)+"分）"};
+    drawGraph($("gr2"),{xmax:m.T,ymax:Math.max(mx,100),xlab:"時間（分）",ylab:"2人の間のきょり（m）",
+      lines:[{pts:pts,col:"var(--accent)",dots:pts}],cur:[{x:t,y:Math.abs(pa-pb),col:"var(--accent)"}],marks:marks,hl:hl});
+  }
+  $("s2tk").textContent=m.d>0?"弟が出発してから":"出発してから";
+  $("s2t").innerHTML=num(t)+"<small>分</small>";$("s2a").innerHTML=num(pa)+"<small>m</small>";$("s2b").innerHTML=num(pb)+"<small>m</small>";$("s2g").innerHTML=num(Math.abs(pa-pb))+"<small>m</small>";
+  $("why2").innerHTML=explain2(m);
+  $("rng2").value=t;
+}
+function explain2(m){
+  var a=m.a,b=m.b,d=m.d,h="";
+  if(m.sc==="meet"){
+    if(d>0)h+="<p>兄が出発するまでの"+d+"分で、弟は "+b+"×"+d+"＝"+(b*d)+"m 進みます。2人の間は 1800−"+(b*d)+"＝<b>"+(DIST-b*d)+"m</b>。</p>";
+    else h+="<p>はじめ、2人の間は<b>1800m</b>です。</p>";
+    h+="<p>向かい合って進むので、2人の間は1分に "+a+"＋"+b+"＝<b>"+(a+b)+"m</b>ずつ縮まります（<b>速さの和</b>）。</p>";
+    if(m.evOk)h+="<p>"+(DIST-b*d)+"÷"+(a+b)+"＝<b>"+num(m.ev-d)+"分</b>"+(d>0?"（兄が出発してから）":"")+"で出会います。場所は家から "+a+"×"+num(m.ev-d)+"＝<b>"+num(m.evPos)+"m</b>。</p>";
+    else h+="<p>出会う前に、どちらかが着いてしまいます。</p>";
+  }else{
+    if(d===0){h+="<p>同時に出発すると、はじめは2人の間が0mです。";h+=a>b?"兄のほうが速いので、弟ははなされていきます。弟に<b>先に出発</b>してもらうと、追いかける場面になります。</p>":a<b?"弟のほうが速いので、兄ははなされていきます。</p>":"2人とも同じ速さなので、ずっとならんで進みます。</p>";return h;}
+    h+="<p>兄が出発するまでの"+d+"分で、弟は "+b+"×"+d+"＝<b>"+(b*d)+"m</b> 先に進んでいます。</p>";
+    if(a<=b)return h+"<p>兄の速さが弟より速くないので、兄は弟に<b>追いつけません</b>。</p>";
+    h+="<p>同じ向きに進むので、2人の間は1分に "+a+"−"+b+"＝<b>"+(a-b)+"m</b>ずつ縮まります（<b>速さの差</b>）。</p>";
+    var need=b*d/(a-b);
+    h+="<p>"+(b*d)+"÷"+(a-b)+"＝<b>"+num(need)+"分</b>（兄が出発してから）で追いつくはずです。";
+    if(m.evOk)h+="そのとき家から "+a+"×"+num(need)+"＝<b>"+num(m.evPos)+"m</b>。弟が出発してからは "+d+"＋"+num(need)+"＝"+num(m.ev)+"分です。</p>";
+    else h+="でも、そのときの場所は家から "+a+"×"+num(need)+"＝"+num(a*need)+"mで、1800mをこえます。だから<b>学校に着くまでに追いつきません</b>。</p>";
+  }
+  return h;
+}
+function seg2(id,key,cast){$(id).addEventListener("click",function(e){var b=e.target.closest("button");if(!b)return;S2[key]=cast(b.dataset.v);
+  [].forEach.call(this.children,function(x){x.setAttribute("aria-pressed",String(x===b));});stop();S2.t=0;build2();});}
+seg2("sc2","sc",String);seg2("a2","a",Number);seg2("b2","b",Number);seg2("d2","d",Number);
+$("gm2").addEventListener("click",function(e){var b=e.target.closest("button");if(!b)return;S2.gm=b.dataset.v;
+  [].forEach.call(this.children,function(x){x.setAttribute("aria-pressed",String(x===b));});draw2();});
+$("rng2").addEventListener("input",function(){stop();S2.t=+this.value;draw2();});
+
+/* ---------- タブ ---------- */
+LabTabs(function(id){stop();var t=id==="p1"?1:2;
+  $("figs1").hidden=t!==1;$("figs2").hidden=t!==2;$("st1").hidden=t!==1;$("st2").hidden=t!==2;
+  if(t===1)build1();else build2();});
+})();
+</script>
+</body>
+</html>

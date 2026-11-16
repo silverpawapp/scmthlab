@@ -1,0 +1,708 @@
+<!doctype html>
+<html lang="ja" data-root="../">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#edf0f5" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0d1221" media="(prefers-color-scheme: dark)">
+<title>立体の切断｜理科・算数ラボ</title>
+<link rel="manifest" href="../manifest.webmanifest">
+<link rel="icon" href="../icons/icon-192.png">
+<link rel="apple-touch-icon" href="../icons/icon-180.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=Zen+Maru+Gothic:wght@700;900&display=swap">
+<link rel="stylesheet" href="../css/common.css">
+<style>
+:root{--p1:#3f7ee0;--p2:#9a5fd6;--ok:#2e9a5f;--ng:#c8502d}
+@media (prefers-color-scheme: dark){:root{--p1:#7aa7f2;--p2:#bf93ee;--ok:#5cc98e;--ng:#f0906f}}
+.stage{background:var(--surface2);border:1px solid var(--line);touch-action:none}
+.stage canvas{display:block;width:100%!important;height:100%!important}
+.views .row{display:flex;gap:5px;justify-content:flex-end}
+.views{flex-direction:column;align-items:flex-end}
+.cap{position:absolute;left:8px;bottom:8px;font-size:12px;color:#fff;background:rgba(20,26,44,.6);padding:2px 8px;border-radius:6px;pointer-events:none;max-width:calc(100% - 16px)}
+.fail{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:20px;text-align:center;color:var(--muted);font-size:15px;line-height:1.7}
+.prow{display:flex;gap:8px;align-items:center;background:var(--surface2);border-radius:10px;padding:6px 10px;font-size:15px;line-height:1.5;min-height:44px}
+.prow.empty{color:var(--muted)}
+.badge{flex:none;font-family:var(--f-head);font-weight:900;font-size:16px;min-width:1.9em;height:1.9em;border-radius:50%;background:var(--accent);color:#1b1300;display:inline-flex;align-items:center;justify-content:center}
+.badge.off{background:transparent;border:2px dashed var(--line);color:var(--muted)}
+.plist{display:flex;flex-direction:column;gap:6px}
+select{font-size:16px;min-height:44px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:4px 8px;min-width:0}
+.pickrow{display:grid;grid-template-columns:1fr 1.4fr auto;gap:6px}
+.go{background:var(--accent)!important;border-color:var(--accent)!important;color:#1b1400!important}
+.btn:disabled{opacity:.45}
+.presets{display:flex;flex-wrap:wrap;gap:6px}
+.presets button{min-height:42px;border-radius:10px;border:1px solid var(--line);background:var(--surface);padding:0 10px;font-size:14px;font-weight:700;cursor:pointer}
+.presets button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.stats3{display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:6px}
+.stat{background:var(--surface2);border-radius:10px;padding:6px 8px;min-width:0}
+.stat .k{font-size:13px;color:var(--muted);line-height:1.35}
+.stat .v{font-family:var(--f-head);font-weight:900;font-size:20px;color:var(--accent-ink);font-variant-numeric:tabular-nums;line-height:1.3;overflow-wrap:anywhere}
+.stat .v small{font-size:.6em;font-weight:700}
+.dot{display:inline-block;width:.8em;height:.8em;border-radius:3px;vertical-align:-1px;margin-right:3px}
+.d1{background:var(--p1)}.d2{background:var(--p2)}
+.msg{background:var(--surface2);border-radius:10px;padding:12px;font-size:15px;line-height:1.7}
+.msg.warn{border:2px solid var(--ng)}
+#sec2d{display:block;width:100%;max-width:400px;height:auto;margin:0 auto;background:var(--surface2);border-radius:10px}
+.faces{font-size:14px;line-height:1.6;margin:0}
+.formula{background:var(--surface2);border-radius:10px;padding:8px 10px;font-size:15px;line-height:1.8;font-variant-numeric:tabular-nums}
+.formula b{font-family:var(--f-head);font-size:17px;color:var(--accent-ink)}
+.why p{margin:0 0 6px}.why p:last-child{margin:0}
+.rules{list-style:none;margin:0;padding:0}
+.rules li{background:var(--surface2);border-radius:10px;padding:7px 10px;margin:0 0 6px;font-size:15px;line-height:1.55;border:2px solid transparent}
+.rules li b{font-family:var(--f-head)}
+.rules li.on{border-color:var(--accent);background:var(--accent-soft)}
+.step{background:var(--surface2);border-radius:10px;padding:10px 12px;font-size:15px;line-height:1.75;min-height:6em}
+.step .no{font-size:13px;color:var(--muted);font-weight:700;display:block;margin-bottom:2px}
+.note{font-size:13px;color:var(--muted);line-height:1.6;margin:0}
+h3{font-family:var(--f-head);font-size:16px;margin:4px 0 0}
+svg text{font-family:var(--f-body)}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div id="app">
+  <header class="topbar">
+    <a class="backbtn" href="../">＜ メニュー</a>
+    <h1>立体の切断</h1>
+  </header>
+
+  <section class="stage" id="stage" aria-label="立方体ABCD-EFGH（1辺6cm）の3D図">
+    <div class="views">
+      <div class="row">
+        <button data-view="naname" aria-pressed="true">ななめ</button>
+        <button data-view="front" aria-pressed="false">正面</button>
+        <button data-view="top" aria-pressed="false">真上</button>
+      </div>
+      <div class="row"><button class="z" id="zIn" aria-label="拡大">＋</button><button class="z" id="zOut" aria-label="縮小">−</button></div>
+    </div>
+    <div class="cap" id="cap">ドラッグで回せます</div>
+  </section>
+
+  <div class="tabs" role="tablist" aria-label="モード">
+    <button role="tab" data-pane="p1">① 自由に切る</button>
+    <button role="tab" data-pane="p2">② 切り口のかき方</button>
+  </div>
+
+  <!-- ① -->
+  <div class="pane" id="p1" role="tabpanel">
+    <section class="panel">
+      <h2>3つの点を選ぶ<small>立方体ABCD-EFGH（1辺6cm）</small></h2>
+      <div class="plist" id="plist"></div>
+      <div class="grid2">
+        <button class="btn" id="clear">選び直す</button>
+        <button class="btn go" id="split" aria-pressed="false" disabled>✂ 切り分ける</button>
+      </div>
+      <p class="hint">図の点をタップすると選べます。選んだ点をもう一度タップすると、選ぶのをやめます。押しにくいときは、下のリストから選ぼう。</p>
+      <div class="lbl">辺を何等分した点から選ぶ？</div>
+      <div class="seg" id="divs">
+        <button data-div="2" aria-pressed="false">2等分</button>
+        <button data-div="3" aria-pressed="false">3等分</button>
+        <button data-div="4" aria-pressed="false">4等分</button>
+        <button data-div="6" aria-pressed="true">6等分</button>
+      </div>
+      <div class="lbl">リストから選ぶ</div>
+      <div class="pickrow">
+        <select id="selEdge" aria-label="辺"></select>
+        <select id="selPos" aria-label="位置"></select>
+        <button class="btn" id="addPt">選ぶ</button>
+      </div>
+    </section>
+    <section class="panel">
+      <h2>やってみよう</h2>
+      <div class="presets" id="presets"></div>
+    </section>
+    <section class="panel" id="res1">
+      <h2>結果</h2>
+      <div class="msg" id="msg1"></div>
+      <div id="out1" hidden>
+        <div class="stats3">
+          <div class="stat"><div class="k">切り口の形</div><div class="v" id="s-shape"></div></div>
+          <div class="stat"><div class="k">角の数＝通る面の数</div><div class="v" id="s-n"></div></div>
+          <div class="stat"><div class="k">平行な辺</div><div class="v" id="s-par"></div></div>
+        </div>
+        <h3 style="margin-top:10px">切り口を真正面から見ると</h3>
+        <svg id="sec2d" viewBox="0 0 360 230" role="img" aria-label="切り口の形"></svg>
+        <p class="faces" id="faces"></p>
+        <h3 style="margin-top:10px">切り分けた2つの立体</h3>
+        <div class="stats3" style="grid-template-columns:1fr 1fr 1fr">
+          <div class="stat"><div class="k"><span class="dot d1"></span>青い立体</div><div class="v" id="s-v1"></div></div>
+          <div class="stat"><div class="k"><span class="dot d2"></span>むらさき</div><div class="v" id="s-v2"></div></div>
+          <div class="stat"><div class="k">体積の比（青：むらさき）</div><div class="v" id="s-ratio"></div></div>
+        </div>
+        <div class="formula" id="formula" style="margin-top:8px"></div>
+        <div class="why" style="margin-top:8px"><b>なぜ？</b><div id="why"></div></div>
+      </div>
+    </section>
+    <p class="note">豆腐やねん土の立方体を、実際に包丁で切ってみると、もっとよく分かります（切るときは大人といっしょに）。</p>
+  </div>
+
+  <!-- ② -->
+  <div class="pane" id="p2" role="tabpanel" hidden>
+    <section class="panel">
+      <h2 id="exTitle"></h2>
+      <div class="step" id="stepText" aria-live="polite"></div>
+      <div class="grid3">
+        <button class="btn" id="stPrev">◀ もどる</button>
+        <button class="btn go" id="stNext">つぎへ ▶</button>
+        <button class="btn" id="stFirst">最初から</button>
+      </div>
+      <ol class="rules" id="rules">
+        <li data-r="1"><b>ルール①</b> 同じ面の上にある2つの点は、まっすぐ結ぶ。</li>
+        <li data-r="2"><b>ルール②</b> 向かい合う（平行な）面の切り口の線は、平行になる。</li>
+        <li data-r="3"><b>ルール③</b> 同じ面に点がないときは、線や辺をのばして、ぶつかる点をさがす。</li>
+      </ol>
+    </section>
+    <section class="panel">
+      <h2>例を選ぶ</h2>
+      <div class="presets" id="exs"></div>
+      <p class="hint">「つぎへ ▶」を押すと、切り口の線が1本ずつ引かれていきます。図を回して、線がどの面の上にあるか確かめよう。</p>
+    </section>
+  </div>
+</div>
+<div id="update" class="update" hidden><span>新しい版があります。</span><button id="updateBtn" type="button">開き直す</button></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script src="../js/common.js"></script>
+<script>
+// ※ 計算・図・説明文は「立体切断ラボ.html」（①②）と同じ。③問題は入れない
+(function(){
+"use strict";
+var $=function(id){return document.getElementById(id);};
+var NS="http://www.w3.org/2000/svg";
+
+/* =========================================================
+   立方体のデータ（内部は 1cm＝12 の整数で計算する → 1辺＝72）
+   A〜D が上の面、E〜H が下の面。A の真下が E。
+   x：右、y：上、z：手前（前の面が DCGH）
+   ========================================================= */
+var U=12, L=72, CM=6;
+var VN="ABCDEFGH".split("");
+var VP=[[0,L,0],[L,L,0],[L,L,L],[0,L,L],[0,0,0],[L,0,0],[L,0,L],[0,0,L]];
+var EDGES=[[0,1],[1,2],[2,3],[0,3],[4,5],[5,6],[6,7],[4,7],[0,4],[1,5],[2,6],[3,7]];
+var FACES=[
+  {v:[0,1,2,3],nm:"上の面ABCD"},{v:[4,5,6,7],nm:"下の面EFGH"},
+  {v:[0,1,5,4],nm:"うしろの面ABFE"},{v:[3,2,6,7],nm:"前の面DCGH"},
+  {v:[0,3,7,4],nm:"左の面ADHE"},{v:[1,2,6,5],nm:"右の面BCGF"}];
+FACES.forEach(function(f){
+  for(var ax=0;ax<3;ax++){var c=VP[f.v[0]][ax];if(f.v.every(function(i){return VP[i][ax]===c;})){f.ax=ax;f.val=c;}}
+});
+function ename(ei){return VN[EDGES[ei][0]]+VN[EDGES[ei][1]];}
+
+/* ---------- 小さな計算 ---------- */
+function sub(a,b){return [a[0]-b[0],a[1]-b[1],a[2]-b[2]];}
+function add(a,b){return [a[0]+b[0],a[1]+b[1],a[2]+b[2]];}
+function mul(a,s){return [a[0]*s,a[1]*s,a[2]*s];}
+function dot(a,b){return a[0]*b[0]+a[1]*b[1]+a[2]*b[2];}
+function cross(a,b){return [a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]];}
+function len(a){return Math.sqrt(dot(a,a));}
+function norm(a){var l=len(a);return [a[0]/l,a[1]/l,a[2]/l];}
+function gcd(a,b){a=Math.abs(a);b=Math.abs(b);while(b){var t=a%b;a=b;b=t;}return a;}
+function same(a,b){return Math.abs(a[0]-b[0])<1e-7&&Math.abs(a[1]-b[1])<1e-7&&Math.abs(a[2]-b[2])<1e-7;}
+function toCm(u){return [u[0]/U,u[1]/U,u[2]/U];}
+function rnd(n){return Math.floor(Math.random()*n);}
+function pick(a){return a[rnd(a.length)];}
+/* 数の表示：小数第2位までで割り切れればそのまま、そうでなければ「約」 */
+function num(x){var r=Math.round(x*100)/100;if(Math.abs(x-r)<1e-6)return String(+r.toFixed(2));
+  for(var q=3;q<=48;q++){var p=Math.round(x*q);if(Math.abs(x*q-p)<1e-7)return fracCm(p,q);}
+  return "約"+(+r.toFixed(1));}
+function nice(x){return Math.abs(x*100-Math.round(x*100))<1e-6;}
+/* p/q cm を、小数か帯分数で表す */
+function fracCm(p,q){var g=gcd(p,q);p/=g;q/=g;var t=q;while(t%2===0)t/=2;while(t%5===0)t/=5;
+  if(t===1)return String(+(p/q).toFixed(4));
+  var w=Math.floor(p/q),r=p-w*q;return (w?w+"と":"")+r+"/"+q;}
+
+/* ---------- 点 ---------- */
+/* 点：{u:[x,y,z]（1/12cm単位）, vi:頂点番号 or -1, ei:辺番号 or -1, a,b:辺の始点からの比 a:b} */
+function makePt(u){
+  for(var i=0;i<8;i++)if(same(u,VP[i]))return {u:u.slice(),vi:i,ei:-1};
+  for(var e=0;e<12;e++){
+    var A=VP[EDGES[e][0]],B=VP[EDGES[e][1]],ax=-1,ok=true;
+    for(var k=0;k<3;k++){if(A[k]!==B[k])ax=k;}
+    for(k=0;k<3;k++){if(k!==ax&&Math.abs(u[k]-A[k])>1e-7)ok=false;}
+    var t=(u[ax]-A[ax])/(B[ax]-A[ax]);
+    if(ok&&t>0&&t<1){var a=Math.round(Math.abs(u[ax]-A[ax])*1e6),b=Math.round(Math.abs(B[ax]-u[ax])*1e6);var g=gcd(a,b);return {u:u.slice(),vi:-1,ei:e,a:a/g,b:b/g};}
+  }
+  return {u:u.slice(),vi:-1,ei:-1};
+}
+function key(p){return p.u.map(function(x){return Math.round(x*1000);}).join(",");}
+function distFromStart(p){return fracCm(CM*p.a,p.a+p.b);} // 辺の始点からのきょり（cm）
+function posText(p,lab){
+  if(p.vi>=0)return "頂点"+VN[p.vi];
+  if(p.ei<0)return "";
+  var s=VN[EDGES[p.ei][0]],t=VN[EDGES[p.ei][1]];
+  if(p.a===p.b)return "辺"+s+t+"の真ん中";
+  return "辺"+s+t+"の上、"+s+"から"+distFromStart(p)+"cm（"+s+lab+"："+lab+t+"＝"+p.a+"："+p.b+"）";
+}
+function facesOf(u){var r=[];FACES.forEach(function(f,i){if(Math.abs(u[f.ax]-f.val)<1e-7)r.push(i);});return r;}
+function gridPts(n){
+  var out=VP.map(function(v){return makePt(v);}),st=L/n;
+  EDGES.forEach(function(e){var A=VP[e[0]],B=VP[e[1]];
+    for(var k=1;k<n;k++){out.push(makePt([A[0]+(B[0]-A[0])*k/n,A[1]+(B[1]-A[1])*k/n,A[2]+(B[2]-A[2])*k/n]));}});
+  return out;
+}
+
+/* ---------- 切断の計算 ---------- */
+function doCut(P){
+  var a=P[0].u,n=cross(sub(P[1].u,a),sub(P[2].u,a));
+  if(!n[0]&&!n[1]&&!n[2])return {err:"line"};
+  var off=dot(n,a),d=VP.map(function(v){return dot(n,v)-off;});
+  var pos=d.some(function(x){return x>0;}),neg=d.some(function(x){return x<0;});
+  if(!pos||!neg)return {err:"face"};
+  var pts=[];
+  for(var i=0;i<8;i++)if(d[i]===0)pts.push(makePt(VP[i]));
+  EDGES.forEach(function(e,ei){var d1=d[e[0]],d2=d[e[1]];
+    if(d1*d2<0){var A=VP[e[0]],B=VP[e[1]],t=d1/(d1-d2);var g=gcd(d1,d2);
+      pts.push({u:add(A,mul(sub(B,A),t)),vi:-1,ei:ei,a:Math.abs(d1)/g,b:Math.abs(d2)/g});}});
+  // 平面の上で角度順にならべる
+  var c=[0,0,0];pts.forEach(function(p){c=add(c,p.u);});c=mul(c,1/pts.length);
+  var nn=norm(n),ux=norm(sub(pts[0].u,c)),wx=cross(nn,ux);
+  pts.forEach(function(p){var v=sub(p.u,c);p._ang=Math.atan2(dot(v,wx),dot(v,ux));});
+  pts.sort(function(x,y){return x._ang-y._ang;});
+  var R={n:n,off:off,d:d,poly:pts};
+  R.pieces=[1,-1].map(function(s){return piece(R,s);});
+  // 青＝小さいほう（同じなら頂点Aをふくまないほう）
+  if(R.pieces[0].vol>R.pieces[1].vol+1e-9){R.pieces.reverse();}
+  R.pieces[0].col=1;R.pieces[1].col=2;
+  R.shape=classify(pts.map(function(p){return toCm(p.u);}));
+  return R;
+}
+/* 切り分けた片方の立体（s=1 か -1 のがわ） */
+function piece(R,s){
+  var faces=[],verts=[];
+  FACES.forEach(function(f,fi){
+    var out=[];
+    for(var i=0;i<4;i++){var c=f.v[i],nx=f.v[(i+1)%4],dc=s*R.d[c],dn=s*R.d[nx];
+      if(dc>=0)out.push(VP[c]);
+      if((dc>0&&dn<0)||(dc<0&&dn>0)){var t=dc/(dc-dn);out.push(add(VP[c],mul(sub(VP[nx],VP[c]),t)));}}
+    if(out.length>=3){var poly=out.map(toCm);if(area(poly)>1e-9)faces.push({poly:poly,fi:fi});}
+  });
+  faces.push({poly:R.poly.map(function(p){return toCm(p.u);}),fi:-1});
+  var sv=[];for(var i=0;i<8;i++)if(s*R.d[i]>0)sv.push(i);
+  // 体積：内側の点から各面への角すいの和
+  faces.forEach(function(f){f.poly.forEach(function(p){verts.push(p);});});
+  var O=[0,0,0];verts.forEach(function(p){O=add(O,p);});O=mul(O,1/verts.length);
+  var V=0;faces.forEach(function(f){var nf=norm(polyNormal(f.poly));V+=area(f.poly)*Math.abs(dot(nf,sub(O,f.poly[0])))/3;});
+  return {s:s,faces:faces,vol:V,sv:sv};
+}
+function polyNormal(p){var n=[0,0,0];for(var i=0;i<p.length;i++){n=add(n,cross(p[i],p[(i+1)%p.length]));}return n;}
+function area(p){return len(polyNormal(p))/2;}
+
+/* 形の名前 */
+function classify(P){
+  var k=P.length,Ls=[],D=[],i;
+  for(i=0;i<k;i++){var v=sub(P[(i+1)%k],P[i]);D.push(v);Ls.push(len(v));}
+  function eq(a,b){return Math.abs(a-b)<1e-6;}
+  function par(i,j){return len(cross(D[i],D[j]))<1e-6*Ls[i]*Ls[j];}
+  function right(i){var a=D[(i+k-1)%k],b=D[i];return Math.abs(dot(a,b))<1e-6*len(a)*len(b);}
+  var pairs=[];for(i=0;i<k;i++)for(var j=i+1;j<k;j++)if(par(i,j))pairs.push([i,j]);
+  var name,cat;
+  if(k===3){cat="tri";name=(eq(Ls[0],Ls[1])&&eq(Ls[1],Ls[2]))?"正三角形":(eq(Ls[0],Ls[1])||eq(Ls[1],Ls[2])||eq(Ls[0],Ls[2]))?"二等辺三角形":"三角形";}
+  else if(k===4){cat="quad";var p1=par(0,2),p2=par(1,3);
+    if(p1&&p2){var r=right(0),e=eq(Ls[0],Ls[1]);name=r&&e?"正方形":r?"長方形":e?"ひし形":"平行四辺形";}
+    else name=(p1||p2)?"台形":"四角形";}
+  else if(k===5){cat="pent";name="五角形";}
+  else {cat="hex";var alle=Ls.every(function(x){return eq(x,Ls[0]);}),alla=true;for(i=0;i<k;i++)if(!eq(len(sub(P[(i+2)%k],P[i])),len(sub(P[2],P[0]))))alla=false;
+    name=(alle&&alla)?"正六角形":"六角形";}
+  return {name:name,cat:cat,k:k,Ls:Ls,pairs:pairs,right:P.map(function(_,i){return right(i);})};
+}
+
+/* 体積の式（小学生が式を立てられる形のときだけ） */
+function formulaOf(R,pc){
+  var sv=pc.sv;
+  // 三角すい：切り取られた頂点が1つで、切り口が三角形
+  if(sv.length===1&&R.poly.length===3){
+    var V=sv[0],ls=[];
+    EDGES.forEach(function(e){if(e[0]===V||e[1]===V){var W=e[0]===V?e[1]:e[0];
+      var p=R.poly.filter(function(q){return q.vi===W||(q.ei>=0&&EDGES[q.ei].indexOf(V)>=0&&EDGES[q.ei].indexOf(W)>=0);})[0];
+      if(p)ls.push(len(sub(p.u,VP[V]))/U);}});
+    if(ls.length===3&&ls.every(nice)){var v=ls[0]*ls[1]/2*ls[2]/3;
+      return {kind:"三角すい",txt:"頂点"+VN[V]+"のところの三角すい：底面 "+num(ls[0])+"×"+num(ls[1])+"÷2、高さ "+num(ls[2])+" → "+num(ls[0])+"×"+num(ls[1])+"÷2×"+num(ls[2])+"÷3 ＝ <b>"+num(v)+"</b>cm³",v:v};}
+  }
+  // 柱：切り口の平面が、どれかの辺と平行
+  var n=R.n,zc=[0,1,2].filter(function(k){return n[k]===0;});
+  if(zc.length>=1){
+    var ax=zc[0],fi=-1;FACES.forEach(function(f,i){if(f.ax===ax&&f.val===0)fi=i;});
+    var f=pc.faces.filter(function(x){return x.fi===fi;})[0];if(!f)return null;
+    var o=[0,1,2].filter(function(k){return k!==ax;});
+    var P2=f.poly.map(function(p){return [p[o[0]],p[o[1]]];}),k=P2.length;
+    function d2(a,b){return Math.hypot(a[0]-b[0],a[1]-b[1]);}
+    function rt(i){var a=P2[(i+k-1)%k],b=P2[i],c=P2[(i+1)%k];return Math.abs((a[0]-b[0])*(c[0]-b[0])+(a[1]-b[1])*(c[1]-b[1]))<1e-6;}
+    var dir=["左右","上下","前後"][ax];
+    if(k===3){for(var i=0;i<3;i++)if(rt(i)){var a=d2(P2[i],P2[(i+2)%3]),b=d2(P2[i],P2[(i+1)%3]);
+      if(nice(a)&&nice(b)){var v2=a*b/2*CM;return {kind:"三角柱",txt:"三角柱（"+dir+"にまっすぐ）：底面 "+num(a)+"×"+num(b)+"÷2、高さ 6 → "+num(a)+"×"+num(b)+"÷2×6 ＝ <b>"+num(v2)+"</b>cm³",v:v2};}}}
+    if(k===4){var rs=[];for(i=0;i<4;i++)if(rt(i))rs.push(i);
+      if(rs.length===4){var w=d2(P2[0],P2[1]),h=d2(P2[1],P2[2]);if(nice(w)&&nice(h)){var v3=w*h*CM;return {kind:"直方体",txt:"直方体："+num(w)+"×"+num(h)+"×6 ＝ <b>"+num(v3)+"</b>cm³",v:v3};}}
+      for(i=0;i<4;i++){var j=(i+1)%4;if(rt(i)&&rt(j)){var hh=d2(P2[i],P2[j]),p=d2(P2[i],P2[(i+3)%4]),q=d2(P2[j],P2[(j+1)%4]);
+        if(nice(hh)&&nice(p)&&nice(q)){var v4=(p+q)*hh/2*CM;return {kind:"四角柱",txt:"底面が台形の四角柱（"+dir+"にまっすぐ）：底面 ("+num(p)+"＋"+num(q)+")×"+num(hh)+"÷2、高さ 6 → ("+num(p)+"＋"+num(q)+")×"+num(hh)+"÷2×6 ＝ <b>"+num(v4)+"</b>cm³",v:v4};}}}}
+  }
+  return null;
+}
+
+/* =========================================================
+   3D図
+   ========================================================= */
+var stage=$("stage"),three=null;
+var css=function(n){return getComputedStyle(document.documentElement).getPropertyValue(n).trim();};
+function initThree(){
+  if(typeof THREE==="undefined"||!THREE.OrbitControls){
+    var f=document.createElement("div");f.className="fail";
+    f.innerHTML="3Dの図を表示する部品を読みこめませんでした。<br>はじめて使うときは、電波（インターネット）のある所で開いてください。<br>（リストから点を選ぶと、結果は見られます）";
+    stage.appendChild(f);$("cap").hidden=true;return;
+  }
+  var renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});
+  renderer.setPixelRatio(Math.min(2,window.devicePixelRatio||1));
+  stage.insertBefore(renderer.domElement,stage.firstChild);
+  var scene=new THREE.Scene(),camera=new THREE.PerspectiveCamera(32,1,0.1,200);
+  scene.add(new THREE.AmbientLight(0xffffff,0.62));
+  var dl=new THREE.DirectionalLight(0xffffff,0.55);dl.position.set(6,12,9);scene.add(dl);
+  var dl2=new THREE.DirectionalLight(0xffffff,0.25);dl2.position.set(-8,-4,-6);scene.add(dl2);
+  var root=new THREE.Group();root.position.set(-3,-3,-3);scene.add(root);
+  // ホイールはCtrl／⌘を押しているときだけ拡大・縮小（ページのスクロールをじゃましない）
+  stage.addEventListener("wheel",function(e){if(!e.ctrlKey&&!e.metaKey)e.stopPropagation();},{capture:true});
+  var controls=new THREE.OrbitControls(camera,renderer.domElement);
+  controls.enableDamping=true;controls.enablePan=false;controls.minDistance=9;controls.maxDistance=45;
+  three={renderer:renderer,scene:scene,camera:camera,controls:controls,root:root,hits:[],tex:{}};
+  setView("naname");
+  function resize(){var w=stage.clientWidth,h=stage.clientHeight;if(!w||!h)return;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();}
+  if(window.ResizeObserver)new ResizeObserver(resize).observe(stage);else window.addEventListener("resize",resize);
+  resize();
+  (function loop(){requestAnimationFrame(loop);controls.update();renderer.render(scene,camera);})();
+  // タップで点を選ぶ（ドラッグで回したときは選ばない）
+  var down=null,ray=new THREE.Raycaster(),mv=new THREE.Vector2();
+  renderer.domElement.addEventListener("pointerdown",function(e){down={x:e.clientX,y:e.clientY};});
+  renderer.domElement.addEventListener("pointerup",function(e){
+    if(!down)return;var dx=e.clientX-down.x,dy=e.clientY-down.y;down=null;
+    if(dx*dx+dy*dy>49||!three.hits.length)return;
+    var r=renderer.domElement.getBoundingClientRect();
+    mv.x=(e.clientX-r.left)/r.width*2-1;mv.y=-(e.clientY-r.top)/r.height*2+1;
+    ray.setFromCamera(mv,camera);var hit=ray.intersectObjects(three.hits,false);
+    if(hit.length)onPick(hit[0].object.userData.pt);
+  });
+}
+function setView(v){
+  [].forEach.call(document.querySelectorAll("[data-view]"),function(b){b.setAttribute("aria-pressed",String(b.dataset.view===v));});
+  if(!three)return;var c=three.camera;
+  if(v==="front")c.position.set(0,0,20);else if(v==="top")c.position.set(0,20,0.001);else c.position.set(7.5,7.5,16);
+  three.controls.target.set(0,0,0);three.controls.update();
+}
+function zoom(f){if(!three)return;var c=three.camera,ct=three.controls,off=c.position.clone().sub(ct.target);
+  off.setLength(Math.min(ct.maxDistance,Math.max(ct.minDistance,off.length()*f)));c.position.copy(ct.target).add(off);ct.update();}
+
+function clearGroup(g){while(g.children.length){var o=g.children.pop();o.traverse(function(x){if(x.geometry)x.geometry.dispose();if(x.material&&x.material.map&&!x.material.map.__keep)x.material.map.dispose();if(x.material)x.material.dispose();});}}
+function V3(p){return new THREE.Vector3(p[0],p[1],p[2]);}
+function col(c){return new THREE.Color(c);}
+function rod(a,b,r,color,opacity){
+  var A=V3(a),B=V3(b),l=A.distanceTo(B);if(l<1e-6)return null;
+  var m=new THREE.Mesh(new THREE.CylinderGeometry(r,r,l,10,1),new THREE.MeshBasicMaterial({color:col(color),transparent:opacity<1,opacity:opacity||1}));
+  m.position.copy(A).add(B).multiplyScalar(.5);m.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),B.clone().sub(A).normalize());return m;
+}
+function dash(a,b,color){
+  var g=new THREE.BufferGeometry().setFromPoints([V3(a),V3(b)]);
+  var l=new THREE.Line(g,new THREE.LineDashedMaterial({color:col(color),dashSize:.22,gapSize:.16}));l.computeLineDistances();return l;
+}
+function ball(p,r,color){var m=new THREE.Mesh(new THREE.SphereGeometry(r,18,12),new THREE.MeshLambertMaterial({color:col(color)}));m.position.copy(V3(p));return m;}
+function polyMesh(poly,color,opacity){
+  var pos=[];for(var i=1;i+1<poly.length;i++){pos.push.apply(pos,poly[0]);pos.push.apply(pos,poly[i]);pos.push.apply(pos,poly[i+1]);}
+  var g=new THREE.BufferGeometry();g.setAttribute("position",new THREE.Float32BufferAttribute(pos,3));g.computeVertexNormals();
+  return new THREE.Mesh(g,new THREE.MeshLambertMaterial({color:col(color),transparent:opacity<1,opacity:opacity,side:THREE.DoubleSide,depthWrite:opacity>=1}));
+}
+function label(text,p,color,big){
+  var k=text+"|"+color+"|"+(big?1:0),tex=three.tex[k];
+  if(!tex){var cv=document.createElement("canvas");cv.width=128;cv.height=128;var c=cv.getContext("2d");
+    c.font="900 "+(big?80:70)+"px 'Zen Maru Gothic','BIZ UDPGothic',sans-serif";c.textAlign="center";c.textBaseline="middle";
+    c.lineWidth=14;c.lineJoin="round";c.strokeStyle=css("--surface2")||"#fff";c.strokeText(text,64,68);c.fillStyle=color;c.fillText(text,64,68);
+    tex=new THREE.CanvasTexture(cv);tex.__keep=true;three.tex[k]=tex;}
+  var s=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,depthTest:false,transparent:true}));
+  s.renderOrder=20;s.position.copy(V3(p));var sc=big?.95:.8;s.scale.set(sc,sc,1);return s;
+}
+function outward(p,amt){var c=[3,3,3],v=sub(p,c),l=len(v)||1;return add(p,mul(v,amt/l));}
+
+/* 図をかく
+   spec = {pts:[{p(cm),kind:"grid|sel|sec|ext",lab,pt}], pick, lines:[{a,b,kind:"cut|old|hi"}], dashes:[{a,b}], fill:poly, pieces:[{faces,col,shift,dim}], hiEdges:[ei], cutPlane }  */
+var lastSpec=null;
+function render(spec){
+  lastSpec=spec;if(!three)return;
+  var R=three.root;clearGroup(R);three.hits=[];
+  var ink=css("--ink"),acc=css("--accent"),mut=css("--muted"),p1=css("--p1"),p2=css("--p2"),pc=[null,p1,p2];
+  var shiftOfV=function(){return [0,0,0];};
+  if(spec.pieces){
+    spec.pieces.forEach(function(pz){
+      var g=new THREE.Group();g.position.copy(V3(pz.shift));R.add(g);
+      pz.faces.forEach(function(f){
+        var m=polyMesh(f.poly,f.fi<0?acc:pc[pz.col],pz.dim?.18:(f.fi<0?.95:.82));g.add(m);
+        for(var i=0;i<f.poly.length;i++){var r=rod(f.poly[i],f.poly[(i+1)%f.poly.length],.03,ink,pz.dim?.3:1);if(r)g.add(r);}
+      });
+    });
+    shiftOfV=spec.vshift;
+  }else{
+    for(var e=0;e<12;e++){var a=toCm(VP[EDGES[e][0]]),b=toCm(VP[EDGES[e][1]]);
+      var hi=spec.hiEdges&&spec.hiEdges.indexOf(e)>=0;R.add(rod(a,b,hi?.075:.035,hi?css("--focus"):ink,1));}
+    var box=new THREE.Mesh(new THREE.BoxGeometry(6,6,6),new THREE.MeshLambertMaterial({color:col(css("--surface")),transparent:true,opacity:.28,depthWrite:false}));
+    box.position.set(3,3,3);R.add(box);
+  }
+  for(var i=0;i<8;i++){var vp=toCm(VP[i]);R.add(label(VN[i],add(outward(vp,.62),shiftOfV(i)),ink,false));}
+  if(spec.fill)R.add(polyMesh(spec.fill,acc,.5));
+  (spec.lines||[]).forEach(function(l){var r=rod(l.a,l.b,l.kind==="old"?.05:.07,l.kind==="old"?mut:acc,1);if(r)R.add(r);});
+  (spec.dashes||[]).forEach(function(l){R.add(dash(l.a,l.b,ink));});
+  (spec.pts||[]).forEach(function(q){
+    if(q.kind==="grid"){
+      R.add(ball(q.p,.09,mut));
+      if(spec.pick){var h=new THREE.Mesh(new THREE.SphereGeometry(.45,8,6),new THREE.MeshBasicMaterial({visible:false}));h.position.copy(V3(q.p));h.userData.pt=q.pt;R.add(h);three.hits.push(h);}
+    }else{
+      R.add(ball(q.p,q.kind==="sel"?.17:.13,q.kind==="ext"?ink:acc));
+      if(spec.pick&&q.kind==="sel"){var h2=new THREE.Mesh(new THREE.SphereGeometry(.48,8,6),new THREE.MeshBasicMaterial({visible:false}));h2.position.copy(V3(q.p));h2.userData.pt=q.pt;R.add(h2);three.hits.push(h2);}
+      if(q.lab&&q.vi<0){R.add(label(q.lab,outward(q.p,.55),q.kind==="ext"?ink:css("--accent-ink"),true));}
+    }
+  });
+}
+if(window.matchMedia){var mq=matchMedia("(prefers-color-scheme: dark)");var re=function(){if(three){three.tex={};}if(lastSpec)render(lastSpec);};
+  if(mq.addEventListener)mq.addEventListener("change",re);else if(mq.addListener)mq.addListener(re);}
+
+/* =========================================================
+   ① 自由に切る
+   ========================================================= */
+var tab=1,div=6,sel=[],split=false,cut1=null;
+var LET=["P","Q","R"],EXL=["S","T","U","W"];
+function labelsFor(selPts,R){
+  var map={},i=0;
+  selPts.forEach(function(p){map[key(p)]=p.vi>=0?VN[p.vi]:LET[i++];});
+  if(R&&R.poly){var j=0;R.poly.forEach(function(p){var k=key(p);if(!(k in map))map[k]=p.vi>=0?VN[p.vi]:EXL[j++];});}
+  return map;
+}
+function onPick(pt){
+  if(tab!==1||split)return;
+  var k=key(pt),i=sel.map(key).indexOf(k);
+  if(i>=0)sel.splice(i,1);else if(sel.length<3)sel.push(pt);else{sel=[sel[0],sel[1],pt];}
+  update1();
+}
+function update1(){
+  cut1=sel.length===3?doCut(sel):null;
+  var ok=cut1&&!cut1.err;
+  if(!ok)split=false;
+  $("split").disabled=!ok;$("split").setAttribute("aria-pressed",String(split));
+  var lab=labelsFor(sel,ok?cut1:null);
+  // 点の一覧
+  var h="";
+  for(var i=0;i<3;i++){var p=sel[i];
+    if(p){var l=lab[key(p)];h+='<div class="prow"><span class="badge">'+l+'</span><span>'+posText(p,l)+'</span></div>';}
+    else h+='<div class="prow empty"><span class="badge off">'+(i+1)+'</span><span>'+(i===sel.length?"図の点をタップして選ぼう":"")+'</span></div>';}
+  $("plist").innerHTML=h;
+  // 図
+  var spec={pick:!split,pts:[],lines:[]};
+  if(!split){
+    var shown={};sel.forEach(function(p){shown[key(p)]=1;});
+    gridPts(div).forEach(function(p){if(!shown[key(p)])spec.pts.push({p:toCm(p.u),kind:"grid",pt:p,vi:p.vi});});
+    sel.forEach(function(p){spec.pts.push({p:toCm(p.u),kind:"sel",lab:lab[key(p)],pt:p,vi:p.vi});});
+  }
+  if(ok){
+    var poly=cut1.poly.map(function(p){return toCm(p.u);});
+    if(split){
+      var nn=norm(cut1.n);
+      spec.pieces=cut1.pieces.map(function(pc){return {faces:pc.faces,col:pc.col,shift:mul(nn,pc.s*1.0)};});
+      spec.vshift=function(i){return cut1.d[i]===0?[0,0,0]:mul(nn,(cut1.d[i]>0?1:-1)*1.0);};
+      $("cap").textContent="切り分けた2つの立体を、はなして表示しています";
+    }else{
+      spec.fill=poly;
+      for(i=0;i<poly.length;i++)spec.lines.push({a:poly[i],b:poly[(i+1)%poly.length],kind:"cut"});
+      cut1.poly.forEach(function(p){var k=key(p);if(!sel.some(function(s){return key(s)===k;}))spec.pts.push({p:toCm(p.u),kind:"sec",lab:lab[k],vi:p.vi});});
+      $("cap").textContent="ドラッグで回せます";
+    }
+  }else $("cap").textContent=sel.length<3?"点をタップして3つ選ぼう（ドラッグで回せます）":"ドラッグで回せます";
+  render(spec);
+  // 結果
+  var msg=$("msg1");
+  if(!ok){
+    $("out1").hidden=true;msg.hidden=false;msg.classList.toggle("warn",!!(cut1&&cut1.err));
+    if(!cut1)msg.innerHTML="辺の上の点を<b>あと"+(3-sel.length)+"個</b>選ぼう。3つの点を通る平面で、立方体を切ります。<br><span class='hint'>「やってみよう」のボタンを押すと、よく出る切り方を見られます。</span>";
+    else if(cut1.err==="line")msg.innerHTML="3つの点が<b>一直線</b>にならんでいます。一直線の上の点だけでは、平面が1つに決まりません。ちがう点を選ぼう。";
+    else msg.innerHTML="3つの点が<b>同じ面の上</b>にあります。平面がその面そのものになるので、立方体は切れません。ちがう面の点を選ぼう。";
+    return;
+  }
+  msg.hidden=true;var was=!$("out1").hidden;$("out1").hidden=false;
+  showResult1(cut1,lab);
+  if(!was&&!split)setTimeout(function(){$("res1").scrollIntoView({behavior:"smooth",block:"start"});},250);
+}
+var WHY={
+  tri:"<p>切り口が<b>3つの面</b>を通ると、三角形になります。</p><p>立方体の切り口の三角形は、どの角も90°より小さくなります。<b>直角三角形や、鈍角三角形はできません</b>。</p>",
+  quad:"<p>切り口が<b>4つの面</b>を通ると、四角形になります。</p><p>立方体の面は、向かい合う3組でできています。4つの面を通ると、そのうち少なくとも2つは向かい合う面です。向かい合う面の切り口は平行（ルール②）なので、<b>立方体の切り口の四角形には、平行な辺が必ずあります</b>（台形・平行四辺形・ひし形・長方形・正方形のどれか）。</p>",
+  pent:"<p>切り口が<b>5つの面</b>を通ると、五角形になります。</p><p>5つの面の中には、向かい合う面が2組あります。だから<b>平行な辺が2組</b>できます。</p>",
+  hex:"<p>切り口が<b>6つの面すべて</b>を通ると、六角形になります。</p><p>向かい合う面が3組なので、<b>向かい合う辺が3組とも平行</b>です。立方体の面は6つしかないので、<b>七角形より角の多い切り口はできません</b>。</p>"
+};
+function showResult1(R,lab){
+  var s=R.shape;
+  $("s-shape").textContent=s.name;
+  $("s-n").innerHTML=s.k+"<small>つ</small>";
+  $("s-par").innerHTML=s.pairs.length?s.pairs.length+"<small>組</small>":"なし";
+  drawSec2D($("sec2d"),R.poly.map(function(p){return toCm(p.u);}),R.poly.map(function(p){return lab[key(p)];}),s);
+  // 通る面
+  var fl=[];for(var i=0;i<R.poly.length;i++){var a=R.poly[i].u,b=R.poly[(i+1)%R.poly.length].u;
+    var fa=facesOf(a),fb=facesOf(b),c=fa.filter(function(x){return fb.indexOf(x)>=0;});
+    if(c.length)fl.push(lab[key(R.poly[i])]+lab[key(R.poly[(i+1)%R.poly.length])]+"…"+c.map(function(x){return FACES[x].nm;}).join("と"));}
+  $("faces").innerHTML="切り口の辺と、その辺がある面：<br>"+fl.join("<br>");
+  var P=R.pieces;
+  $("s-v1").innerHTML=num(P[0].vol)+"<small>cm³</small>";$("s-v2").innerHTML=num(P[1].vol)+"<small>cm³</small>";
+  $("s-ratio").textContent=ratio(P[0].vol,P[1].vol);
+  var f0=formulaOf(R,P[0]),f1=formulaOf(R,P[1]),h="";
+  var nm=["<span class='dot d1'></span>青：","<span class='dot d2'></span>むらさき："];
+  if(f0)h+=nm[0]+f0.txt+"<br>";
+  if(f1)h+=nm[1]+f1.txt+"<br>";
+  if(f0&&!f1)h+=nm[1]+"216 − "+num(f0.v)+" ＝ <b>"+num(216-f0.v)+"</b>cm³";
+  if(f1&&!f0)h+=nm[0]+"216 − "+num(f1.v)+" ＝ <b>"+num(216-f1.v)+"</b>cm³";
+  if(!f0&&!f1&&Math.abs(P[0].vol-P[1].vol)<1e-7)h="切り口の平面が立方体の<b>中心</b>を通るので、2つの立体はぴったり同じ形です。216÷2 ＝ <b>108</b>cm³";
+  else if(!f0&&!f1)h="この切り方では、どちらの立体も、小学校で習う式ではそのまま求めにくい形です。体積はコンピューターで計算した値を表示しています。";
+  $("formula").innerHTML=h;
+  $("why").innerHTML=WHY[s.cat]+(s.name==="正六角形"?"<p>6本の辺の長さがすべて等しく、角もすべて等しいので<b>正六角形</b>です。</p>":"");
+}
+function ratio(a,b){
+  // 小さい整数の比になるときだけ表示
+  for(var q=1;q<=999;q++){var p=a/b*q,pr=Math.round(p);if(pr>0&&pr<=999&&Math.abs(p-pr)<1e-7){var g=gcd(pr,q);return (pr/g)+"："+(q/g);}}
+  return "約 "+(a/b).toFixed(2)+"：1";
+}
+
+/* 切り口を真正面から見た図 */
+function drawSec2D(svg,poly,labs,s){
+  while(svg.firstChild)svg.removeChild(svg.firstChild);
+  var n=norm(polyNormal(poly)),c=[0,0,0];poly.forEach(function(p){c=add(c,p);});c=mul(c,1/poly.length);
+  // いちばん長い辺を下にして横向きにそろえる
+  var li=0,k0=poly.length;for(var i0=1;i0<k0;i0++)if(len(sub(poly[(i0+1)%k0],poly[i0]))>len(sub(poly[(li+1)%k0],poly[li]))+1e-6)li=i0;
+  var ux=norm(sub(poly[(li+1)%k0],poly[li])),wy=cross(n,ux);
+  if(dot(sub(c,poly[li]),wy)<0)wy=mul(wy,-1);
+  var P=poly.map(function(p){var v=sub(p,c);return [dot(v,ux),dot(v,wy)];});
+  var xs=P.map(function(p){return p[0];}),ys=P.map(function(p){return p[1];});
+  var W=360,H=230,m=34,sc=Math.min((W-2*m)/(Math.max.apply(0,xs)-Math.min.apply(0,xs)),(H-2*m)/(Math.max.apply(0,ys)-Math.min.apply(0,ys)));
+  var cx=(Math.max.apply(0,xs)+Math.min.apply(0,xs))/2,cy=(Math.max.apply(0,ys)+Math.min.apply(0,ys))/2;
+  var Q=P.map(function(p){return [W/2+(p[0]-cx)*sc,H/2-(p[1]-cy)*sc];});
+  function el(t,a){var e=document.createElementNS(NS,t);for(var k in a)e.setAttribute(k,a[k]);svg.appendChild(e);return e;}
+  el("polygon",{points:Q.map(function(q){return q.join(",");}).join(" "),fill:"var(--accent-soft)",stroke:"var(--accent)","stroke-width":3,"stroke-linejoin":"round"});
+  var k=Q.length,cen=[W/2,H/2];
+  // 同じ長さの辺に印
+  var groups=[],gi=[];
+  s.Ls.forEach(function(l,i){var g=-1;groups.forEach(function(x,j){if(Math.abs(x-l)<1e-6)g=j;});if(g<0){groups.push(l);g=groups.length-1;}gi.push(g);});
+  var cnt=groups.map(function(_,j){return gi.filter(function(x){return x===j;}).length;}),mark=0,markOf={};
+  groups.forEach(function(_,j){if(cnt[j]>=2)markOf[j]=++mark;});
+  for(var i=0;i<k;i++){var j=gi[i];if(!markOf[j])continue;
+    var a=Q[i],b=Q[(i+1)%k],mx=(a[0]+b[0])/2,my=(a[1]+b[1])/2,dx=b[0]-a[0],dy=b[1]-a[1],l=Math.hypot(dx,dy);dx/=l;dy/=l;
+    for(var t=0;t<markOf[j];t++){var o=(t-(markOf[j]-1)/2)*6;el("line",{x1:mx+dx*o-dy*7,y1:my+dy*o+dx*7,x2:mx+dx*o+dy*7,y2:my+dy*o-dx*7,stroke:"var(--ink)","stroke-width":2});}}
+  // 直角の印
+  for(i=0;i<k;i++){if(!s.right[i])continue;var v=Q[i],pa=Q[(i+k-1)%k],pb=Q[(i+1)%k];
+    var ua=[pa[0]-v[0],pa[1]-v[1]],ub=[pb[0]-v[0],pb[1]-v[1]],la=Math.hypot(ua[0],ua[1]),lb=Math.hypot(ub[0],ub[1]),r=11;
+    ua=[ua[0]/la*r,ua[1]/la*r];ub=[ub[0]/lb*r,ub[1]/lb*r];
+    el("path",{d:"M"+(v[0]+ua[0])+","+(v[1]+ua[1])+" L"+(v[0]+ua[0]+ub[0])+","+(v[1]+ua[1]+ub[1])+" L"+(v[0]+ub[0])+","+(v[1]+ub[1]),fill:"none",stroke:"var(--ink)","stroke-width":1.5});}
+  // 頂点の名前
+  Q.forEach(function(q,i){var dx=q[0]-cen[0],dy=q[1]-cen[1],l=Math.hypot(dx,dy)||1;
+    var t=el("text",{x:q[0]+dx/l*18,y:q[1]+dy/l*18+6,"text-anchor":"middle","font-size":17,"font-weight":700,fill:"var(--accent-ink)"});t.textContent=labs[i];
+    el("circle",{cx:q[0],cy:q[1],r:4,fill:"var(--accent)"});});
+  var note=el("text",{x:W-8,y:H-8,"text-anchor":"end","font-size":11,fill:"var(--muted)"});
+  note.textContent=(mark?"同じ印の辺は同じ長さ　":"")+(s.right.some(function(x){return x;})?"□は直角":"");
+}
+
+/* 操作 */
+$("divs").addEventListener("click",function(e){var b=e.target.closest("button");if(!b)return;div=+b.dataset.div;
+  [].forEach.call(this.children,function(x){x.setAttribute("aria-pressed",String(x===b));});fillPos();update1();});
+$("clear").onclick=function(){sel=[];split=false;update1();};
+$("split").onclick=function(){split=!split;update1();};
+EDGES.forEach(function(e,i){var o=document.createElement("option");o.value=i;o.textContent="辺"+ename(i);$("selEdge").appendChild(o);});
+function fillPos(){var e=+$("selEdge").value,s=$("selPos");s.innerHTML="";
+  for(var k=0;k<=div;k++){var o=document.createElement("option");o.value=k;
+    o.textContent=k===0?"頂点"+VN[EDGES[e][0]]:k===div?"頂点"+VN[EDGES[e][1]]:VN[EDGES[e][0]]+"から"+fracCm(CM*k,div)+"cm";s.appendChild(o);}
+  s.value=Math.floor(div/2);}
+$("selEdge").onchange=fillPos;
+$("addPt").onclick=function(){var e=+$("selEdge").value,k=+$("selPos").value,A=VP[EDGES[e][0]],B=VP[EDGES[e][1]];
+  var p=makePt(add(A,mul(sub(B,A),k/div)));if(split){split=false;}
+  if(sel.map(key).indexOf(key(p))<0){if(sel.length>=3)sel.shift();sel.push(p);}update1();};
+function P(u){return makePt(u);}
+var MID={AB:[36,72,0],BC:[72,72,36],CD:[36,72,72],DA:[0,72,36],EF:[36,0,0],FG:[72,0,36],GH:[36,0,72],HE:[0,0,36],AE:[0,36,0],BF:[72,36,0],CG:[72,36,72],DH:[0,36,72]};
+var PRESETS=[
+  {nm:"正三角形",pts:[VP[0],VP[2],VP[5]]},
+  {nm:"長方形",pts:[VP[0],VP[2],VP[6]]},
+  {nm:"台形",pts:[VP[0],VP[2],MID.FG]},
+  {nm:"ひし形",pts:[VP[0],MID.BF,MID.DH]},
+  {nm:"五角形",pts:[MID.DA,MID.CD,MID.BF]},
+  {nm:"正六角形",pts:[MID.AB,MID.DA,MID.GH]},
+  {nm:"三角すいを切り取る",pts:[MID.DA,MID.AB,MID.AE]}
+];
+PRESETS.forEach(function(p){var b=document.createElement("button");b.textContent=p.nm;b.onclick=function(){sel=p.pts.map(P);split=false;update1();};$("presets").appendChild(b);});
+
+/* =========================================================
+   ② 切り口のかき方
+   ========================================================= */
+function cm(u){return toCm(u);}
+var X4=[-36,72,0],Y4=[72,72,108],S4=[0,60,0],T4=[72,60,72];
+var X5=[72,72,-36],T5=MID.BF,S5=MID.FG,U5=MID.DH;
+var EXS=[
+ {nm:"正三角形",given:[["A",VP[0]],["C",VP[2]],["F",VP[5]]],poly:[VP[0],VP[2],VP[5]],steps:[
+   {r:1,seg:[[VP[0],VP[2]]],t:"AとCは、どちらも<b>上の面ABCD</b>の上にあります。同じ面の上の2点は、まっすぐ結びます。"},
+   {r:1,seg:[[VP[0],VP[5]]],t:"AとFは、どちらも<b>うしろの面ABFE</b>の上。まっすぐ結びます。"},
+   {r:1,seg:[[VP[2],VP[5]]],t:"CとFは、どちらも<b>右の面BCGF</b>の上。まっすぐ結びます。"},
+   {r:0,fill:true,t:"3つの面を通ったので、切り口は<b>三角形</b>です。3本の線は、どれも正方形の対角線なので長さが同じ。だから<b>正三角形</b>になります。"}]},
+ {nm:"長方形",given:[["A",VP[0]],["C",VP[2]],["G",VP[6]]],poly:[VP[0],VP[2],VP[6],VP[4]],steps:[
+   {r:1,seg:[[VP[0],VP[2]]],t:"AとCは<b>上の面ABCD</b>の上。まっすぐ結びます。"},
+   {r:1,seg:[[VP[2],VP[6]]],t:"CとGは<b>右の面BCGF</b>の上（ここは立方体の辺CGそのものです）。"},
+   {r:2,seg:[[VP[6],VP[4]]],t:"<b>下の面EFGH</b>は、上の面ABCDと向かい合う面です。切り口の線はACと平行になるので、Gから<b>ACと平行な線</b>を引きます。すると頂点Eに着きます。"},
+   {r:1,seg:[[VP[4],VP[0]]],t:"EとAは<b>左の面ADHE</b>の上（辺AEそのもの）。これで切り口が閉じました。"},
+   {r:0,fill:true,t:"4つの面を通ったので<b>四角形</b>。ACとEG、AEとCGがそれぞれ平行で、角はすべて直角。だから<b>長方形</b>です。"}]},
+ {nm:"台形",given:[["A",VP[0]],["C",VP[2]],["P",MID.FG]],poly:[VP[0],VP[2],MID.FG,MID.EF],ext:[["S",MID.EF]],steps:[
+   {r:1,seg:[[VP[0],VP[2]]],t:"AとCは<b>上の面ABCD</b>の上。まっすぐ結びます。"},
+   {r:1,seg:[[VP[2],MID.FG]],t:"CとPは、どちらも<b>右の面BCGF</b>の上。まっすぐ結びます。"},
+   {r:2,seg:[[MID.FG,MID.EF]],pts:["S"],t:"Pは<b>下の面EFGH</b>の上にもあります。下の面は上の面と向かい合うので、Pから<b>ACと平行な線</b>を引きます。辺EFの真ん中に着くので、そこをSとします。"},
+   {r:1,seg:[[MID.EF,VP[0]]],t:"SとAは、どちらも<b>うしろの面ABFE</b>の上。まっすぐ結ぶと、切り口が閉じます。"},
+   {r:0,fill:true,t:"4つの面を通ったので<b>四角形</b>。平行な辺はACとSPの1組だけ（SPの長さはACの半分）。だから<b>台形</b>です。"}]},
+ {nm:"五角形（辺をのばす）",given:[["P",MID.DA],["Q",MID.CD],["R",MID.BF]],poly:[MID.DA,MID.CD,T4,MID.BF,S4],ext:[["X",X4,1],["Y",Y4,1],["S",S4],["T",T4]],steps:[
+   {r:1,seg:[[MID.DA,MID.CD]],t:"PとQは<b>上の面ABCD</b>の上。まっすぐ結びます。"},
+   {r:3,dash:[[MID.DA,X4],[VP[0],X4],[MID.CD,Y4],[VP[2],Y4]],pts:["X","Y"],t:"Rと同じ面の上にある点がありません。こんなときは<b>ルール③</b>。線PQを両側にのばし、辺BAをのばした線とぶつかる点をX、辺BCをのばした線とぶつかる点をYとします。<br>Xは<b>うしろの面</b>を広げた平面の上、Yは<b>右の面</b>を広げた平面の上にあります。"},
+   {r:3,dash:[[X4,S4]],seg:[[S4,MID.BF]],pts:["S"],t:"XとRは、どちらも<b>うしろの面</b>の平面の上。XとRを結ぶと、辺AEと交わります。そこをSとします。立方体の中に入る部分SRが切り口の線です。"},
+   {r:3,dash:[[Y4,T4]],seg:[[MID.BF,T4]],pts:["T"],t:"YとRは、どちらも<b>右の面</b>の平面の上。YとRを結ぶと、辺CGと交わります。そこをTとします。切り口の線はRTです。"},
+   {r:1,seg:[[MID.DA,S4],[MID.CD,T4]],t:"残りは同じ面の2点を結ぶだけ。PとSは<b>左の面</b>、QとTは<b>前の面</b>の上です。"},
+   {r:0,fill:true,t:"5つの面を通ったので<b>五角形</b>です。ルール②で確かめると、PSとRT（左と右の面）、SRとQT（うしろと前の面）が平行になっています。"}]},
+ {nm:"正六角形",given:[["P",MID.AB],["Q",MID.DA],["R",MID.GH]],poly:[MID.AB,MID.DA,U5,MID.GH,S5,T5],ext:[["S",S5],["X",X5,1],["T",T5],["U",U5]],steps:[
+   {r:1,seg:[[MID.AB,MID.DA]],t:"PとQは<b>上の面ABCD</b>の上。まっすぐ結びます。"},
+   {r:2,seg:[[MID.GH,S5]],pts:["S"],t:"Rは<b>下の面EFGH</b>の上。下の面は上の面と向かい合うので、Rから<b>PQと平行な線</b>を引きます。辺FGの真ん中に着くので、そこをSとします。"},
+   {r:3,dash:[[MID.AB,X5],[VP[1],X5],[X5,T5]],seg:[[T5,S5],[MID.AB,T5]],pts:["X","T"],t:"線QPをのばして、辺CBをのばした線とぶつかる点をXとします。XとSは、どちらも<b>右の面</b>の平面の上。結ぶと辺BFの真ん中を通るので、そこをTとします。TSは右の面、PTはうしろの面の切り口です。"},
+   {r:2,seg:[[MID.DA,U5]],pts:["U"],t:"<b>左の面</b>は右の面と向かい合うので、Qから<b>TSと平行な線</b>を引きます。辺DHの真ん中に着くので、そこをUとします。"},
+   {r:1,seg:[[U5,MID.GH]],t:"UとRは、どちらも<b>前の面</b>の上。まっすぐ結ぶと、切り口が閉じます。"},
+   {r:0,fill:true,t:"6つの面をすべて通ったので<b>六角形</b>。6本の線は、どれも「となり合う辺の真ん中どうし」を結んでいるので長さが同じで、角もすべて同じ。だから<b>正六角形</b>です。"}]}
+];
+var ex=0,st=0;
+EXS.forEach(function(x,i){var b=document.createElement("button");b.textContent=x.nm;b.dataset.ex=i;b.setAttribute("aria-pressed",String(i===0));
+  b.onclick=function(){ex=i;st=0;[].forEach.call($("exs").children,function(c){c.setAttribute("aria-pressed",String(c===b));});update2();};$("exs").appendChild(b);});
+function update2(){
+  var E=EXS[ex],steps=E.steps,n=steps.length;
+  $("exTitle").textContent="例："+E.nm;
+  var spec={pts:[],lines:[],dashes:[]},shownExt={};
+  E.given.forEach(function(g){var p=makePt(g[1]);spec.pts.push({p:cm(g[1]),kind:"sel",lab:g[0],vi:p.vi});});
+  for(var i=0;i<=st;i++){var s=steps[i];
+    (s.seg||[]).forEach(function(sg){spec.lines.push({a:cm(sg[0]),b:cm(sg[1]),kind:i===st?"cut":"old"});});
+    (s.dash||[]).forEach(function(sg){spec.dashes.push({a:cm(sg[0]),b:cm(sg[1])});});
+    (s.pts||[]).forEach(function(nm){shownExt[nm]=1;});
+    if(s.fill){spec.fill=E.poly.map(cm);spec.lines=spec.lines.map(function(l){l.kind="cut";return l;});}
+  }
+  (E.ext||[]).forEach(function(x){if(shownExt[x[0]])spec.pts.push({p:cm(x[1]),kind:x[2]?"ext":"sec",lab:x[0],vi:-1});});
+  // のばした点がいらなくなったら、うすく残す（最後はのばした線を消す）
+  if(steps[st].fill){spec.dashes=[];spec.pts=spec.pts.filter(function(q){return q.kind!=="ext";});}
+  render(spec);
+  var r=steps[st].r;
+  [].forEach.call($("rules").children,function(li){li.classList.toggle("on",+li.dataset.r===r);});
+  $("stepText").innerHTML='<span class="no">'+(st+1)+" / "+n+(r?"　ルール"+"①②③"[r-1]+"を使う":"　できあがり")+"</span>"+steps[st].t;
+  $("stPrev").disabled=st===0;$("stNext").disabled=st===n-1;
+  $("cap").textContent=steps[st].dash?"点線は、線や辺をのばしたところです":"ドラッグで回せます";
+}
+$("stPrev").onclick=function(){if(st>0){st--;update2();}};
+$("stNext").onclick=function(){if(st<EXS[ex].steps.length-1){st++;update2();}};
+$("stFirst").onclick=function(){st=0;update2();};
+
+/* =========================================================
+   タブ
+   ========================================================= */
+[].forEach.call(document.querySelectorAll("[data-view]"),function(b){b.onclick=function(){setView(b.dataset.view);};});
+$("zIn").onclick=function(){zoom(.8);};$("zOut").onclick=function(){zoom(1.25);};
+
+initThree();
+fillPos();
+LabTabs(function(id){tab=id==="p1"?1:2;if(tab===1)update1();else update2();});
+})();
+</script>
+</body>
+</html>
