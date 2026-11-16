@@ -1,0 +1,437 @@
+<!doctype html>
+<html lang="ja" data-root="../">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#edf0f5" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0d1221" media="(prefers-color-scheme: dark)">
+<title>月の満ち欠け｜理科・算数ラボ</title>
+<link rel="manifest" href="../manifest.webmanifest">
+<link rel="icon" href="../icons/icon-192.png">
+<link rel="apple-touch-icon" href="../icons/icon-180.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=Zen+Maru+Gothic:wght@700;900&display=swap">
+<link rel="stylesheet" href="../css/common.css">
+<style>
+.note3d{right:84px}
+.mini{position:absolute;right:8px;bottom:8px;width:68px;text-align:center;pointer-events:none}
+.mini canvas{width:60px;height:60px;border-radius:50%;background:#080d1c;border:1px solid rgba(255,255,255,.25)}
+.mini span{display:block;color:#e6eaf3;font-size:11px;line-height:1.3;text-shadow:0 1px 2px #000}
+.phase-box{display:flex;gap:14px;align-items:center}
+#phaseCanvas{width:140px;height:140px;flex:none;border-radius:50%;background:#080d1c}
+.moon-name{min-height:1.4em;font-family:var(--f-head);font-weight:900;font-size:24px;line-height:1.3}
+#skyCanvas{width:100%;aspect-ratio:2/1;border-radius:10px;display:block}
+</style>
+</head>
+<body>
+<div id="app">
+  <header class="topbar">
+    <a class="backbtn" href="../">＜ メニュー</a>
+    <h1>月の満ち欠け</h1>
+  </header>
+
+  <section class="stage" id="scene" aria-label="太陽・地球・月の3D図">
+    <div class="views" role="group" aria-label="見る向き">
+      <button id="vFollow" aria-pressed="true">地球を追う</button>
+      <button id="vTop" aria-pressed="false">真上から</button>
+      <button id="vAll" aria-pressed="false">全体</button>
+      <button id="zIn" class="z" aria-label="拡大">＋</button>
+      <button id="zOut" class="z" aria-label="縮小">−</button>
+    </div>
+    <div class="note3d">※ 距離と大きさは実際とちがいます。黄色の矢印＝太陽の光　赤い点＝日本</div>
+    <div class="mini" aria-hidden="true"><canvas id="miniPhase" width="120" height="120"></canvas><span>地球から<br>見た形</span></div>
+  </section>
+
+  <section class="status" aria-label="日時">
+    <div class="line1">
+      <div class="date"><span id="dateLabel">—</span><small id="ageLabel">—</small></div>
+      <button class="play" id="playBtn">▶ うごかす</button>
+    </div>
+  </section>
+
+  <div class="tabs" role="tablist" aria-label="表示の切り替え">
+    <button role="tab" data-pane="pCtl">動かす</button>
+    <button role="tab" data-pane="pPhase">月の形</button>
+    <button role="tab" data-pane="pSky">空</button>
+    <button role="tab" data-pane="pWhy">なぜ？</button>
+  </div>
+
+  <div class="pane" id="pCtl" role="tabpanel">
+    <section class="panel">
+      <div class="lbl">1秒で進む時間</div>
+      <div class="seg" role="group" aria-label="進む速さ">
+        <button data-speed="0.041667" aria-pressed="false">1時間</button>
+        <button data-speed="0.25" aria-pressed="false">6時間</button>
+        <button data-speed="1" aria-pressed="true">1日</button>
+        <button data-speed="7" aria-pressed="false">1週間</button>
+      </div>
+      <div class="lbl">時こく</div>
+      <div class="grid4">
+        <button class="btn" data-hour="6">明け方<br>6時</button>
+        <button class="btn" data-hour="12">正午<br>12時</button>
+        <button class="btn" data-hour="18">夕方<br>18時</button>
+        <button class="btn" data-hour="24">真夜中<br>0時</button>
+      </div>
+      <div class="lbl">日にち</div>
+      <div class="grid3">
+        <button class="btn" id="minusDay">−1日</button>
+        <button class="btn" id="plusDay">＋1日</button>
+        <button class="btn" id="todayBtn">今日</button>
+      </div>
+      <div>
+        <label for="daySlider" class="lbl">日にちを大きく動かす（今日から1年分）</label>
+        <input type="range" id="daySlider" min="0" max="365" step="0.05" value="0">
+        <div class="cap"><span>今日</span><span>半年後</span><span>1年後</span></div>
+      </div>
+    </section>
+  </div>
+
+  <div class="pane" id="pPhase" role="tabpanel" hidden>
+    <section class="panel">
+      <h2>地球から見た月の形</h2>
+      <div class="phase-box">
+        <canvas id="phaseCanvas" width="280" height="280" aria-label="地球から見た月の形"></canvas>
+        <div>
+          <div class="moon-name" id="moonName">—</div>
+          <div class="facts" style="grid-template-columns:1fr">
+            <div class="fact"><div class="k"><ruby>月齢<rt>げつれい</rt></ruby></div><div class="v" id="fAge">—</div></div>
+            <div class="fact"><div class="k">光って見える部分</div><div class="v" id="fLit">—</div></div>
+          </div>
+        </div>
+      </div>
+      <p class="hint">日本（北半球）で、南の空に見えるときの形です。</p>
+    </section>
+  </div>
+
+  <div class="pane" id="pSky" role="tabpanel" hidden>
+    <section class="panel">
+      <h2>日本から見た空<small>南を向いて立ったとき</small></h2>
+      <canvas id="skyCanvas" aria-label="東から西までの空"></canvas>
+      <p class="hint">月が地平線の下にあるときは見えません。「▶ うごかす」で、月と太陽が東から西へ動くようすを見てみよう。</p>
+    </section>
+  </div>
+
+  <div class="pane" id="pWhy" role="tabpanel" hidden>
+    <section class="panel">
+      <h2>なぜこの形に見えるの？</h2>
+      <p class="why" id="whyText">—</p>
+    </section>
+  </div>
+</div>
+<div id="update" class="update" hidden><span>新しい版があります。</span><button id="updateBtn" type="button">開き直す</button></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script src="../js/common.js"></script>
+<script>
+(function(){
+"use strict";
+// ※ 計算の部分は「月の満ち欠けラボ.html」（検証済み）と同じ
+// ---------- 定数 ----------
+const TAU = Math.PI*2, DEG = Math.PI/180;
+const YEAR = 365.256, SYN = 29.530589;
+const BASE = Date.UTC(2026,8,22,15,0,0);      // 計算の基準：2026-09-23 00:00 日本時間（秋分のころ）
+// 開いた日の0時（日本時間）。時間 t はここからの日数。計算は実際の日付で行い、表示は月日だけにする
+const OPEN = Math.floor((Date.now()+9*3600e3)/864e5)*864e5 - 9*3600e3;
+const OFF = Math.round((OPEN-BASE)/864e5);      // 基準日から開いた日までの日数（整数）
+const AGE0 = 10.771;                          // その時点の月齢（平均値）
+const TILT = 23.44*DEG, LAT = 34.7*DEG;       // 地軸の傾き・観測地（浜松付近）
+const SUN_R=9, EARTH_ORBIT=95, EARTH_R=3.2, MOON_ORBIT=14, MOON_R=1.0;
+const T_MAX = 364.999;                          // 開いた日から1年間（同じ月日が2回出ないように）
+
+// ---------- ベクトル計算 ----------
+const dot=(a,b)=>a[0]*b[0]+a[1]*b[1]+a[2]*b[2];
+const cross=(a,b)=>[a[1]*b[2]-a[2]*b[1], a[2]*b[0]-a[0]*b[2], a[0]*b[1]-a[1]*b[0]];
+const norm=a=>{const l=Math.hypot(a[0],a[1],a[2]);return [a[0]/l,a[1]/l,a[2]/l];};
+const rotY=(v,p)=>[v[0]*Math.cos(p)+v[2]*Math.sin(p), v[1], -v[0]*Math.sin(p)+v[2]*Math.cos(p)];
+const rotZ=(v,a)=>[v[0]*Math.cos(a)-v[1]*Math.sin(a), v[0]*Math.sin(a)+v[1]*Math.cos(a), v[2]];
+const onOrbit=(a,r)=>[r*Math.cos(a),0,-r*Math.sin(a)];   // 北から見て反時計回り
+
+const LON = 137.73;                             // 観測地の経度（浜松、東経）
+function state(t){
+  const T = t + OFF;                                  // 基準日からの日数（実際の日付）
+  const d = (BASE + T*864e5)/864e5 + 2440587.5 - 2451545.0;   // 2000年1月1日12時(世界時)からの日数
+  const g = (357.529 + 0.98560028*d)*DEG;
+  const lamS = (280.459 + 0.98564736*d + 1.915*Math.sin(g) + 0.020*Math.sin(2*g))*DEG;
+  const thE = lamS + Math.PI/2;                        // 地球の公転角（図の座標）
+  const age = ((AGE0+T)%SYN+SYN)%SYN;                  // 月齢
+  const elong = TAU*age/SYN;                           // 太陽から月までの角度（東回り）
+  const thM = thE + Math.PI + elong;                   // 月の公転角（地球中心）
+  const lst = (280.46061837 + 360.98564736629*d + LON)*DEG;
+  const spin = lst - Math.PI/2;
+  const E = onOrbit(thE,EARTH_ORBIT);
+  const mo = onOrbit(thM,MOON_ORBIT);
+  return {t,thE,age,elong,thM,spin,E,M:[E[0]+mo[0],E[1]+mo[1],E[2]+mo[2]],mo};
+}
+// 観測者（日本）から見た高度・方位
+function sky(s){
+  const u = norm(rotZ(rotY([Math.cos(LAT),Math.sin(LAT),0], s.spin), -TILT));
+  const n = rotZ([0,1,0], -TILT);
+  const d = dot(n,u);
+  const N = norm([n[0]-d*u[0], n[1]-d*u[1], n[2]-d*u[2]]);
+  const Ea = cross(N,u);
+  const dirS = norm([-s.E[0],-s.E[1],-s.E[2]]);
+  const dirM = norm(s.mo);
+  const aa = v=>{
+    const alt = Math.asin(Math.max(-1,Math.min(1,dot(v,u))))/DEG;
+    let az = Math.atan2(dot(v,Ea), dot(v,N))/DEG; if(az<0) az+=360;
+    return {alt,az};
+  };
+  const sun=aa(dirS), moon=aa(dirM);
+  const A=moon.az*DEG, h=moon.alt*DEG;
+  const right=[0,1,2].map(i=>Math.cos(A)*Ea[i]-Math.sin(A)*N[i]);
+  const up=[0,1,2].map(i=>-Math.sin(A)*Math.sin(h)*Ea[i]-Math.cos(A)*Math.sin(h)*N[i]+Math.cos(h)*u[i]);
+  moon.tilt=Math.atan2(dot(dirS,up),dot(dirS,right));
+  return {sun,moon};
+}
+
+// ---------- 表示用ことば ----------
+function moonName(age){
+  if(age<1||age>=28.5) return "新月";
+  if(age>=1.5&&age<4) return "三日月";
+  const pct=Math.round((1-Math.cos(TAU*age/SYN))/2*100), half=pct>=45&&pct<=55;
+  if(half&&age<SYN/2) return "上<ruby>弦<rt>げん</rt></ruby>の月";
+  if(age>=13.5&&age<16) return "満月";
+  if(half&&age>=SYN/2) return "下<ruby>弦<rt>げん</rt></ruby>の月";
+  return "";
+}
+function plain(html){return html.replace(/<rt>.*?<\/rt>/g,"").replace(/<[^>]+>/g,"");}
+function jst(t){return new Date(OPEN+t*864e5+9*3600e3);}
+function fmtDate(t){
+  const d=jst(t);
+  return `${d.getUTCMonth()+1}月${d.getUTCDate()}日 ${String(d.getUTCHours()).padStart(2,"0")}:${String(d.getUTCMinutes()).padStart(2,"0")}`;
+}
+
+// ---------- 時間 ----------
+const nowT=0;
+let t=Math.floor(nowT)+0.75, playing=false, speed=1;
+
+// ---------- 3D ----------
+const host=document.getElementById("scene");
+const v3=a=>new THREE.Vector3(a[0],a[1],a[2]);
+let G=null, follow=true;
+function init3D(){
+  if(!window.THREE||!THREE.OrbitControls){
+    const d=document.createElement("div");d.className="nogl";
+    d.textContent="3D図を表示できませんでした。はじめて使うときは、電波（インターネット）のある所で開いてください。月の形・空・なぜ？は使えます。";
+    host.appendChild(d);return null;
+  }
+  const renderer=new THREE.WebGLRenderer({antialias:true});
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+  host.prepend(renderer.domElement);
+  const scene=new THREE.Scene();
+  scene.background=new THREE.Color(0x060a17);
+  const camera=new THREE.PerspectiveCamera(45,1,0.5,3000);
+  scene.add(new THREE.AmbientLight(0xffffff,0.13));
+  const sunLight=new THREE.PointLight(0xffffff,1.5,0,0); scene.add(sunLight);
+  function canvasTex(w,h,draw){const c=document.createElement("canvas");c.width=w;c.height=h;draw(c.getContext("2d"),w,h);const tx=new THREE.CanvasTexture(c);tx.anisotropy=4;return tx;}
+  // 星
+  {const g=new THREE.BufferGeometry(),p=[];let seed=7;const r=()=>(seed=(seed*16807)%2147483647)/2147483647;
+   for(let i=0;i<900;i++){const th=r()*TAU,ph=Math.acos(2*r()-1),R=1200;p.push(R*Math.sin(ph)*Math.cos(th),R*Math.cos(ph),R*Math.sin(ph)*Math.sin(th));}
+   g.setAttribute("position",new THREE.Float32BufferAttribute(p,3));
+   scene.add(new THREE.Points(g,new THREE.PointsMaterial({color:0xaab4d0,size:2,sizeAttenuation:false})));}
+  // 太陽
+  scene.add(new THREE.Mesh(new THREE.SphereGeometry(SUN_R,48,32),new THREE.MeshBasicMaterial({color:0xffc83d})));
+  const glow=new THREE.Sprite(new THREE.SpriteMaterial({map:canvasTex(128,128,(c,w,h)=>{const g=c.createRadialGradient(64,64,10,64,64,64);g.addColorStop(0,"rgba(255,210,90,.9)");g.addColorStop(.35,"rgba(255,170,40,.35)");g.addColorStop(1,"rgba(255,150,0,0)");c.fillStyle=g;c.fillRect(0,0,w,h);}),depthWrite:false,blending:THREE.AdditiveBlending}));
+  glow.scale.set(46,46,1); scene.add(glow);
+  function ring(r,color,op){const pts=[];for(let i=0;i<=256;i++){const a=i/256*TAU;pts.push(new THREE.Vector3(r*Math.cos(a),0,-r*Math.sin(a)));}
+   return new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts),new THREE.LineBasicMaterial({color,transparent:true,opacity:op}));}
+  scene.add(ring(EARTH_ORBIT,0x4f7ccc,.45));
+  // 地球（公転グループ → 傾き → 自転）
+  const earthGroup=new THREE.Group(); scene.add(earthGroup);
+  earthGroup.add(ring(MOON_ORBIT,0x9aa3b5,.5));
+  const tiltGroup=new THREE.Group(); tiltGroup.rotation.z=-TILT; earthGroup.add(tiltGroup);
+  const spinGroup=new THREE.Group(); tiltGroup.add(spinGroup);
+  const earthTex=canvasTex(1024,512,(c,w,h)=>{
+    c.fillStyle="#2b6fce";c.fillRect(0,0,w,h);
+    c.strokeStyle="rgba(255,255,255,.28)";c.lineWidth=2;
+    for(let i=1;i<12;i++){const x=i*w/12;c.beginPath();c.moveTo(x,0);c.lineTo(x,h);c.stroke();}
+    for(let j=1;j<6;j++){const y=j*h/6;c.beginPath();c.moveTo(0,y);c.lineTo(w,y);c.stroke();}
+    c.strokeStyle="rgba(255,255,255,.7)";c.lineWidth=3;c.beginPath();c.moveTo(0,h/2);c.lineTo(w,h/2);c.stroke();
+    c.strokeStyle="#ffd24a";c.lineWidth=6;c.beginPath();c.moveTo(w/2,0);c.lineTo(w/2,h);c.stroke();
+    c.fillStyle="#e9f1ff";c.fillRect(0,0,w,26);c.fillRect(0,h-26,w,26);
+  });
+  spinGroup.add(new THREE.Mesh(new THREE.SphereGeometry(EARTH_R,64,40),new THREE.MeshLambertMaterial({map:earthTex})));
+  const pin=new THREE.Mesh(new THREE.SphereGeometry(0.42,16,12),new THREE.MeshBasicMaterial({color:0xff3b3b}));
+  pin.position.set(Math.cos(LAT)*EARTH_R*1.02,Math.sin(LAT)*EARTH_R*1.02,0); spinGroup.add(pin);
+  tiltGroup.add(new THREE.Mesh(new THREE.CylinderGeometry(0.08,0.08,EARTH_R*3.2,8),new THREE.MeshBasicMaterial({color:0xe8ecf5})));
+  // 月
+  const moonTex=canvasTex(512,256,(c,w,h)=>{c.fillStyle="#c3c6cd";c.fillRect(0,0,w,h);let s=3;const r=()=>(s=(s*16807)%2147483647)/2147483647;
+    for(let i=0;i<70;i++){c.fillStyle=`rgba(90,94,104,${.15+r()*.3})`;c.beginPath();c.arc(r()*w,h*.15+r()*h*.7,4+r()*22,0,TAU);c.fill();}});
+  const moon=new THREE.Mesh(new THREE.SphereGeometry(MOON_R,48,32),new THREE.MeshLambertMaterial({map:moonTex}));
+  scene.add(moon);
+  const sightLine=new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(),new THREE.Vector3()]),new THREE.LineDashedMaterial({color:0xcfd6e6,dashSize:.6,gapSize:.5,transparent:true,opacity:.6}));
+  scene.add(sightLine);
+  const rays=[-7,0,7].map(()=>{const a=new THREE.ArrowHelper(new THREE.Vector3(1,0,0),new THREE.Vector3(),10,0xffc83d,2.2,1.4);scene.add(a);return a;});
+  function label(text,color){const tex=canvasTex(256,80,(c,w,h)=>{c.font="700 44px 'Zen Maru Gothic','BIZ UDPGothic',sans-serif";c.textAlign="center";c.textBaseline="middle";c.lineWidth=8;c.strokeStyle="rgba(0,0,0,.7)";c.strokeText(text,w/2,h/2);c.fillStyle=color;c.fillText(text,w/2,h/2);});
+    const s=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,depthTest:false,transparent:true}));s.renderOrder=10;scene.add(s);return s;}
+  const lSun=label("太陽","#ffd46b"), lEarth=label("地球","#9cc4ff"), lMoon=label("月","#e6e8ee"), lNorth=label("北","#ffffff");
+  const controls=new THREE.OrbitControls(camera,renderer.domElement);
+  controls.enableDamping=true; controls.enablePan=false; controls.minDistance=6; controls.maxDistance=700;
+  host.addEventListener("wheel",e=>{if(!e.ctrlKey&&!e.metaKey) e.stopPropagation();},{capture:true});
+  return {renderer,scene,camera,controls,earthGroup,spinGroup,moon,sightLine,rays,lSun,lEarth,lMoon,lNorth,lastE:new THREE.Vector3()};
+}
+G=init3D();
+
+function setView(mode){
+  ["vFollow","vTop","vAll"].forEach(id=>document.getElementById(id).setAttribute("aria-pressed","false"));
+  if(!G) return;
+  const {camera,controls}=G;
+  const s=state(t), E=v3(s.E);
+  if(mode==="all"){follow=false;controls.target.set(0,0,0);camera.position.set(0,165,150);document.getElementById("vAll").setAttribute("aria-pressed","true");}
+  else{
+    follow=true;controls.target.copy(E);G.lastE.copy(E);
+    if(mode==="top"){camera.position.set(E.x+0.01,E.y+48,E.z);document.getElementById("vTop").setAttribute("aria-pressed","true");}
+    else{
+      const out=E.clone().normalize();
+      camera.position.copy(E).add(out.multiplyScalar(26)).add(new THREE.Vector3(0,24,0)).add(new THREE.Vector3(-out.z,0,out.x).multiplyScalar(14));
+      document.getElementById("vFollow").setAttribute("aria-pressed","true");
+    }
+  }
+  controls.update();
+}
+document.getElementById("vFollow").onclick=()=>setView("follow");
+document.getElementById("vTop").onclick=()=>setView("top");
+document.getElementById("vAll").onclick=()=>setView("all");
+function zoom(f){if(!G)return;const {camera,controls}=G;const off=camera.position.clone().sub(controls.target);const d=Math.min(controls.maxDistance,Math.max(controls.minDistance,off.length()*f));camera.position.copy(controls.target).add(off.setLength(d));controls.update();}
+document.getElementById("zIn").onclick=()=>zoom(0.8);
+document.getElementById("zOut").onclick=()=>zoom(1.25);
+
+function apply(s){
+  if(!G) return;
+  const E=v3(s.E), M=v3(s.M);
+  G.earthGroup.position.copy(E);
+  G.spinGroup.rotation.y=s.spin;
+  G.moon.position.copy(M); G.moon.rotation.y=s.thM;
+  G.sightLine.geometry.setFromPoints([E,M]); G.sightLine.computeLineDistances();
+  const dir=E.clone().normalize(), perp=new THREE.Vector3(-dir.z,0,dir.x);
+  G.rays.forEach((ar,i)=>{const off=(i-1)*7;const start=dir.clone().multiplyScalar(SUN_R+4).add(perp.clone().multiplyScalar(off*0.5));
+    const end=E.clone().sub(dir.clone().multiplyScalar(MOON_ORBIT+3)).add(perp.clone().multiplyScalar(off));
+    const d=end.clone().sub(start);ar.position.copy(start);ar.setDirection(d.clone().normalize());ar.setLength(d.length(),2.4,1.5);});
+  G.lSun.position.set(0,SUN_R+5,0); G.lSun.scale.set(12,3.75,1);
+  G.lEarth.position.copy(E).add(new THREE.Vector3(0,EARTH_R+2.4,0)); G.lEarth.scale.set(7,2.2,1);
+  G.lMoon.position.copy(M).add(new THREE.Vector3(0,MOON_R+1.6,0)); G.lMoon.scale.set(5,1.6,1);
+  G.lNorth.position.copy(v3(rotZ([0,EARTH_R*1.6+0.9,0],-TILT)).add(E)); G.lNorth.scale.set(4,1.25,1);
+  if(follow){const d=E.clone().sub(G.lastE);G.camera.position.add(d);G.controls.target.copy(E);G.lastE.copy(E);}
+}
+
+// ---------- 操作 ----------
+const playBtn=document.getElementById("playBtn");
+function setPlaying(p){playing=p;playBtn.textContent=p?"❚❚ とめる":"▶ うごかす";}
+playBtn.onclick=()=>setPlaying(!playing);
+document.querySelectorAll("[data-speed]").forEach(b=>b.onclick=()=>{speed=+b.dataset.speed;document.querySelectorAll("[data-speed]").forEach(x=>x.setAttribute("aria-pressed",x===b?"true":"false"));});
+document.querySelectorAll("[data-hour]").forEach(b=>b.onclick=()=>{t=Math.min(T_MAX,Math.floor(t)+(+b.dataset.hour)/24);});
+const clampT=v=>Math.max(0,Math.min(T_MAX,v));
+document.getElementById("minusDay").onclick=()=>{t=clampT(t-1);};
+document.getElementById("plusDay").onclick=()=>{t=clampT(t+1);};
+document.getElementById("todayBtn").onclick=()=>{t=Math.floor(nowT)+0.75;setView(follow?"follow":"all");};
+const slider=document.getElementById("daySlider");
+slider.addEventListener("input",()=>{t=+slider.value;});
+
+// ---------- 2D パネル ----------
+function drawPhase(c,x,y,r,k,angle,dark){
+  c.save();c.translate(x,y);c.rotate(angle);
+  if(dark){c.fillStyle=dark;c.beginPath();c.arc(0,0,r,0,TAU);c.fill();}
+  const cc=1-2*k, n=60; c.beginPath();
+  for(let i=0;i<=n;i++){const yy=-r+2*r*i/n;c.lineTo(Math.sqrt(Math.max(0,r*r-yy*yy)),yy);}
+  for(let i=n;i>=0;i--){const yy=-r+2*r*i/n;c.lineTo(cc*Math.sqrt(Math.max(0,r*r-yy*yy)),yy);}
+  c.closePath();c.fillStyle="#f5efd6";c.fill();
+  c.restore();
+}
+function drawPhaseOn(cv,s){
+  const c=cv.getContext("2d"), w=cv.width,h=cv.height; c.clearRect(0,0,w,h);
+  c.fillStyle="#080d1c";c.fillRect(0,0,w,h);
+  const k=(1-Math.cos(s.elong))/2;
+  drawPhase(c,w/2,h/2,w*0.38,k,s.elong<Math.PI?0:Math.PI,"#2a2f3b");
+  c.strokeStyle="rgba(200,206,220,.35)";c.lineWidth=2;c.beginPath();c.arc(w/2,h/2,w*0.38,0,TAU);c.stroke();
+}
+const pc=document.getElementById("phaseCanvas"), mini=document.getElementById("miniPhase");
+
+const sc=document.getElementById("skyCanvas"), sctx=sc.getContext("2d");
+function fitSky(){const dpr=Math.min(window.devicePixelRatio||1,2);sc.width=Math.round(sc.clientWidth*dpr);sc.height=Math.round(sc.clientWidth/2*dpr);}
+// 空の図：南の地平線を中心にした「ステレオ投影」
+function enuOf(alt,az){const A=az*DEG,h=alt*DEG;return [Math.sin(A)*Math.cos(h),Math.cos(A)*Math.cos(h),Math.sin(h)];}
+function drawSky(s,a){
+  const W=sc.width,H=sc.height,c=sctx,f=W/600;
+  if(!W||!H) return;
+  const g=28*f, top=16*f, y0=H-g, cx=W/2, R2=y0-top;
+  const P=v=>{const den=1-v[1]; if(den<0.06) return null; return {x:cx+R2*(-v[0])/den, y:y0-R2*v[2]/den};};
+  const PA=(alt,az)=>P(enuOf(alt,az));
+  const inView=p=>p&&p.x>-20*f&&p.x<W+20*f&&p.y>-20*f;
+  const sa=a.sun.alt;
+  const grad=c.createLinearGradient(0,0,0,y0);
+  if(sa>0){grad.addColorStop(0,"#4f97dc");grad.addColorStop(1,"#bfe0f7");}
+  else if(sa>-8){grad.addColorStop(0,"#23386a");grad.addColorStop(1,"#e59b62");}
+  else{grad.addColorStop(0,"#070c22");grad.addColorStop(1,"#1a2850");}
+  c.fillStyle=grad;c.fillRect(0,0,W,y0);
+  c.save();c.beginPath();c.rect(0,0,W,y0);c.clip();
+  if(sa>-3){const p=PA(sa,a.sun.az); if(inView(p)){
+    const gg=c.createRadialGradient(p.x,p.y,2,p.x,p.y,30*f);gg.addColorStop(0,"rgba(255,220,120,.95)");gg.addColorStop(1,"rgba(255,200,80,0)");
+    c.fillStyle=gg;c.beginPath();c.arc(p.x,p.y,30*f,0,TAU);c.fill();c.fillStyle="#ffd046";c.beginPath();c.arc(p.x,p.y,11*f,0,TAU);c.fill();}}
+  c.restore();
+  c.fillStyle="#2f3a2a";c.fillRect(0,y0,W,g);
+  c.fillStyle="#e8ecd8";c.font=`700 ${16*f}px 'Zen Maru Gothic', sans-serif`;c.textAlign="center";c.textBaseline="middle";
+  [[90,"東"],[135,"南東"],[180,"南"],[225,"南西"],[270,"西"]].forEach(([az,n])=>c.fillText(n,PA(0,az).x,y0+g/2));
+  const m=a.moon, r=17*f, mv=enuOf(m.alt,m.az), p=P(mv);
+  if(p&&m.alt>-3&&p.x>-r&&p.x<W+r&&p.y>-r){
+    c.save();c.beginPath();c.rect(0,0,W,y0);c.clip();
+    const sv=enuOf(a.sun.alt,a.sun.az), d=dot(sv,mv);
+    const tv=norm([sv[0]-d*mv[0],sv[1]-d*mv[1],sv[2]-d*mv[2]]);
+    const p2=P(norm([mv[0]+0.02*tv[0],mv[1]+0.02*tv[1],mv[2]+0.02*tv[2]]));
+    const ang=p2?Math.atan2(p2.y-p.y,p2.x-p.x):-m.tilt;
+    const k=(1-Math.cos(s.elong))/2;
+    if(sa>0){c.strokeStyle="rgba(255,255,255,.55)";c.lineWidth=1.2*f;c.beginPath();c.arc(p.x,p.y,r,0,TAU);c.stroke();drawPhase(c,p.x,p.y,r,k,ang,null);}
+    else drawPhase(c,p.x,p.y,r,k,ang,"rgba(70,78,98,.9)");
+    c.restore();
+  }
+}
+
+// ---------- 文章 ----------
+const $=id=>document.getElementById(id);
+function updateText(s){
+  $("dateLabel").textContent=fmtDate(s.t);
+  const k=(1-Math.cos(s.elong))/2, ang=s.elong/DEG, side=ang<=180?"東":"西", sep=ang<=180?ang:360-ang;
+  const name=moonName(s.age);
+  $("ageLabel").textContent=`月齢 ${s.age.toFixed(1)}日`;
+  $("moonName").innerHTML=name||"&nbsp;";
+  $("fAge").textContent=`${s.age.toFixed(1)} 日`;
+  $("fLit").textContent=`${(k*100).toFixed(0)} %`;
+  let why=`月は、太陽の光が当たっている半分だけが光っています。いま月は、地球から見て太陽から <b>${side}へ約${sep.toFixed(0)}°</b> はなれた方向にあります。`;
+  if(sep<12) why+=` 月が太陽とほぼ同じ方向にあるので、光っている側は地球の反対を向いていて、地球からは見えません（${plain(name)}）。`;
+  else if(sep>168) why+=` 月が太陽の反対側にあるので、光っている半分をまっすぐ見ることになり、まるく見えます（${plain(name)}）。`;
+  else why+=` 地球からは、光っている半分のうち <b>${side==="東"?"右":"左"}がわ</b> が見えるので、${(k*100).toFixed(0)}% ほどが光った${name?"「"+plain(name)+"」":"形"}に見えます。`;
+  why+=side==="東"&&sep>=12&&sep<=168?" 太陽より東にある月は、夕方〜夜の空で見やすくなります。":(side==="西"&&sep>=12&&sep<=168?" 太陽より西にある月は、夜中〜明け方の空で見やすくなります。":"");
+  $("whyText").innerHTML=why;
+}
+
+// ---------- タブ ----------
+let pane="pCtl";
+LabTabs(id=>{pane=id; if(id==="pSky") requestAnimationFrame(fitSky);});
+
+// ---------- 毎フレーム ----------
+function resize(){
+  if(G){const w=host.clientWidth,h=host.clientHeight;G.renderer.setSize(w,h,false);G.camera.aspect=w/h;G.camera.updateProjectionMatrix();}
+  fitSky();
+}
+{const ro=new ResizeObserver(resize);ro.observe(host);ro.observe(sc);} window.addEventListener("resize",resize);
+
+let prev=performance.now();
+function loop(now){
+  const dt=Math.min(0.1,(now-prev)/1000); prev=now;
+  if(playing){t+=dt*speed; if(t>=T_MAX){t=T_MAX;setPlaying(false);}}
+  const s=state(t);
+  apply(s); if(G){G.controls.update(); G.renderer.render(G.scene,G.camera);}
+  drawPhaseOn(mini,s);
+  if(pane==="pPhase") drawPhaseOn(pc,s);
+  if(pane==="pSky") drawSky(s,sky(s));
+  updateText(s);
+  if(document.activeElement!==slider) slider.value=t;
+  requestAnimationFrame(loop);
+}
+resize(); apply(state(t)); setView("follow"); requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,469 @@
+<!doctype html>
+<html lang="ja" data-root="../">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#edf0f5" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0d1221" media="(prefers-color-scheme: dark)">
+<title>太陽とかげ｜理科・算数ラボ</title>
+<link rel="manifest" href="../manifest.webmanifest">
+<link rel="icon" href="../icons/icon-192.png">
+<link rel="apple-touch-icon" href="../icons/icon-180.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=Zen+Maru+Gothic:wght@700;900&display=swap">
+<link rel="stylesheet" href="../css/common.css">
+<style>
+.stage{background:#8cc4ee}
+.legend3d{position:absolute;left:8px;bottom:6px;right:8px;display:flex;flex-wrap:wrap;gap:2px 10px;font-size:12px;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.85);pointer-events:none}
+.legend3d i{display:inline-block;width:14px;height:4px;border-radius:2px;vertical-align:middle;margin-right:4px}
+.status .slider{margin-top:-2px}
+.status .cap{margin-top:-8px}
+button.s-summer[aria-pressed="true"]{background:var(--summer);border-color:var(--summer);color:#fff}
+button.s-equinox[aria-pressed="true"]{background:var(--equinox);border-color:var(--equinox);color:#fff}
+button.s-winter[aria-pressed="true"]{background:var(--winter);border-color:var(--winter);color:#fff}
+#paper{width:min(100%,360px,max(240px,calc(100dvh - 600px)));aspect-ratio:1/1;display:block;margin:0 auto;border-radius:10px}
+.reclist{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:14px;color:var(--muted)}
+.reclist i{display:inline-block;width:10px;height:10px;border-radius:50%;vertical-align:middle;margin-right:4px}
+.tbl{display:flex;flex-direction:column;gap:8px}
+.srow{background:var(--surface2);border-radius:10px;padding:8px 10px;border-left:6px solid var(--line)}
+.srow .n{font-family:var(--f-head);font-weight:900;font-size:17px}
+.srow dl{display:grid;grid-template-columns:auto 1fr;gap:0 12px;margin:2px 0 0;font-size:15px}
+.srow dt{color:var(--muted)}
+.srow dd{margin:0;font-weight:700;font-variant-numeric:tabular-nums}
+</style>
+</head>
+<body>
+<div id="app">
+  <header class="topbar">
+    <a class="backbtn" href="../">＜ メニュー</a>
+    <h1>太陽とかげ</h1>
+  </header>
+
+  <section class="stage" id="scene" aria-label="地面の棒と太陽の通り道の3D図">
+    <div class="views" role="group" aria-label="見る向き">
+      <button id="vDiag" aria-pressed="true">ななめ</button>
+      <button id="vTop" aria-pressed="false">真上</button>
+      <button id="vSouth" aria-pressed="false">南から</button>
+      <button id="zIn" class="z" aria-label="拡大">＋</button>
+      <button id="zOut" class="z" aria-label="縮小">−</button>
+    </div>
+    <div class="legend3d">
+      <span><i style="background:#ffd23f"></i>この日の通り道</span>
+      <span><i style="background:#e8563a"></i>夏至</span>
+      <span><i style="background:#39b36f"></i>春分・秋分</span>
+      <span><i style="background:#3f7fe6"></i>冬至</span>
+      <span>棒＝1m</span>
+    </div>
+  </section>
+
+  <section class="status" aria-label="日時">
+    <div class="line1">
+      <div class="date"><span id="dateLabel">—</span><small id="placeLabel">—</small></div>
+      <button class="play" id="playBtn">▶ うごかす</button>
+    </div>
+    <div class="slider">
+      <input type="range" id="timeSlider" min="210" max="1230" step="1" value="720" aria-label="時刻">
+      <div class="cap"><span>3:30</span><span>6時</span><span>9時</span><span>12時</span><span>15時</span><span>18時</span><span>20:30</span></div>
+    </div>
+  </section>
+
+  <div class="tabs" role="tablist" aria-label="表示の切り替え">
+    <button role="tab" data-pane="pCtl">動かす</button>
+    <button role="tab" data-pane="pPaper">記録用紙</button>
+    <button role="tab" data-pane="pNow">数値</button>
+    <button role="tab" data-pane="pSeason">季節</button>
+  </div>
+
+  <div class="pane" id="pCtl" role="tabpanel">
+    <section class="panel">
+      <div class="lbl">場所</div>
+      <div class="seg" role="group" aria-label="場所">
+        <button data-place="sapporo" aria-pressed="false">札幌</button>
+        <button data-place="tokyo" aria-pressed="true">東京</button>
+        <button data-place="naha" aria-pressed="false">那覇</button>
+      </div>
+      <div class="lbl">季節</div>
+      <div class="grid4">
+        <button class="btn s-equinox" data-season="spring">春分</button>
+        <button class="btn s-summer" data-season="summer">夏至</button>
+        <button class="btn s-equinox" data-season="autumn">秋分</button>
+        <button class="btn s-winter" data-season="winter">冬至</button>
+      </div>
+      <div class="grid3">
+        <button class="btn" id="minusDay">−1日</button>
+        <button class="btn" id="plusDay">＋1日</button>
+        <button class="btn" id="todayBtn">今日</button>
+      </div>
+      <div>
+        <label for="daySlider" class="lbl">日にち（今日から1年分）</label>
+        <input type="range" id="daySlider" min="0" max="365" step="1" value="0">
+        <div class="cap"><span>今日</span><span>半年後</span><span>1年後</span></div>
+      </div>
+      <div class="lbl">1秒で進む時間</div>
+      <div class="seg" role="group" aria-label="進む速さ">
+        <button data-speed="10" aria-pressed="false">10分</button>
+        <button data-speed="30" aria-pressed="true">30分</button>
+        <button data-speed="60" aria-pressed="false">1時間</button>
+      </div>
+      <div class="lbl">3D図に表示する</div>
+      <div class="grid2">
+        <button class="btn" id="tgSeason" aria-pressed="true">季節の通り道</button>
+        <button class="btn" id="tgRay" aria-pressed="true">光の線</button>
+      </div>
+    </section>
+  </div>
+
+  <div class="pane" id="pPaper" role="tabpanel" hidden>
+    <section class="panel">
+      <h2>記録用紙<small>真上から見たかげ（北が上）</small></h2>
+      <canvas id="paper" aria-label="真上から見たかげの記録"></canvas>
+      <p class="hint">点は1時間ごとのかげの先。太い線がいまのかげ、黄色の丸が太陽の方角です。</p>
+      <div class="grid2">
+        <button class="btn" id="recAdd">この日の記録を残す</button>
+        <button class="btn" id="recClear">記録を消す</button>
+      </div>
+      <div class="reclist" id="recList"></div>
+    </section>
+  </div>
+
+  <div class="pane" id="pNow" role="tabpanel" hidden>
+    <section class="panel">
+      <h2>いまの太陽とかげ</h2>
+      <div class="facts">
+        <div class="fact"><div class="k">太陽の高さ</div><div class="v" id="fAlt">—</div></div>
+        <div class="fact"><div class="k">太陽の方角</div><div class="v" id="fAz">—</div></div>
+        <div class="fact"><div class="k">かげの長さ（1mの棒）</div><div class="v" id="fLen">—</div></div>
+        <div class="fact"><div class="k">かげの向き</div><div class="v" id="fDir">—</div></div>
+        <div class="fact"><div class="k">日の出</div><div class="v" id="fRise">—</div></div>
+        <div class="fact"><div class="k">日の入り</div><div class="v" id="fSet">—</div></div>
+        <div class="fact"><div class="k">南中（いちばん高い）</div><div class="v" id="fNoon">—</div></div>
+        <div class="fact"><div class="k">昼の長さ</div><div class="v" id="fDay">—</div></div>
+      </div>
+      <p class="why" id="whyText">—</p>
+    </section>
+  </div>
+
+  <div class="pane" id="pSeason" role="tabpanel" hidden>
+    <section class="panel">
+      <h2>季節で比べる<small id="seasonPlace">—</small></h2>
+      <div class="tbl" id="seasonBody"></div>
+    </section>
+  </div>
+</div>
+<div id="update" class="update" hidden><span>新しい版があります。</span><button id="updateBtn" type="button">開き直す</button></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script src="../js/common.js"></script>
+<script>
+(function(){
+"use strict";
+// ※ 計算の部分は「太陽とかげラボ.html」（検証済み）と同じ
+// ================= 天文計算 =================
+const DEG=Math.PI/180, TAU=Math.PI*2;
+const PLACES={
+  sapporo:{name:"札幌",lat:43.06,lon:141.35,color:"#8a5cd6"},
+  tokyo:{name:"東京",lat:35.69,lon:139.69,color:"#e0533d"},
+  naha:{name:"那覇",lat:26.21,lon:127.68,color:"#1f9e8f"}
+};
+function sunAltAz(ms,lat,lon){
+  const d=ms/864e5+2440587.5-2451545.0;
+  const g=(357.529+0.98560028*d)*DEG;
+  const lam=(280.459+0.98564736*d+1.915*Math.sin(g)+0.020*Math.sin(2*g))*DEG;
+  const eps=(23.439-0.0000004*d)*DEG;
+  const ra=Math.atan2(Math.cos(eps)*Math.sin(lam),Math.cos(lam));
+  const dec=Math.asin(Math.sin(eps)*Math.sin(lam));
+  const H=(280.46061837+360.98564736629*d+lon)*DEG-ra;
+  const phi=lat*DEG;
+  const alt=Math.asin(Math.sin(phi)*Math.sin(dec)+Math.cos(phi)*Math.cos(dec)*Math.cos(H));
+  let az=Math.atan2(-Math.cos(dec)*Math.sin(H),Math.sin(dec)*Math.cos(phi)-Math.cos(dec)*Math.cos(H)*Math.sin(phi));
+  if(az<0)az+=TAU;
+  return {alt:alt/DEG,az:az/DEG};
+}
+const OPEN=Math.floor((Date.now()+9*3600e3)/864e5)*864e5-9*3600e3;
+const msOf=(day,min)=>OPEN+day*864e5+min*60e3;
+function mdOf(day){const d=new Date(OPEN+day*864e5+9*3600e3);return {m:d.getUTCMonth()+1,d:d.getUTCDate()};}
+const durTxt=m=>{const t=Math.round(m);return `${Math.floor(t/60)}時間${t%60}分`;};
+const hm=min=>{const m=Math.round(min);return `${Math.floor(m/60)}:${String(m%60).padStart(2,"0")}`;};
+const DIR16=["北","北北東","北東","東北東","東","東南東","南東","南南東","南","南南西","南西","西南西","西","西北西","北西","北北西"];
+const dir16=az=>DIR16[Math.round(((az%360)+360)%360/22.5)%16];
+const dayCache={};
+function dayInfo(day,pk){
+  const key=day+pk; if(dayCache[key]) return dayCache[key];
+  const P=PLACES[pk]; let prev=null,rise=null,set=null,riseAz=null,noon=null,noonAlt=-99;
+  for(let m=0;m<=1440;m++){
+    const s=sunAltAz(msOf(day,m),P.lat,P.lon);
+    if(prev!==null){
+      if(prev.alt<-0.833&&s.alt>=-0.833&&rise===null){rise=m;riseAz=s.az;}
+      if(prev.alt>=-0.833&&s.alt<-0.833&&set===null&&rise!==null)set=m;
+    }
+    if(s.alt>noonAlt){noonAlt=s.alt;noon=m;}
+    prev=s;
+  }
+  return dayCache[key]={rise,set,riseAz,noon,noonAlt};
+}
+function sunLon(ms){const d=ms/864e5+2440587.5-2451545.0;const g=(357.529+0.98560028*d)*DEG;return ((280.459+0.98564736*d+1.915*Math.sin(g)+0.020*Math.sin(2*g))%360+360)%360;}
+// 春分0°・夏至90°・秋分180°・冬至270°：その黄経をこえる日（今日から1年以内）
+const seasonDayCache={};
+function seasonDay(k){
+  if(seasonDayCache[k]!=null) return seasonDayCache[k];
+  const target={spring:0,summer:90,autumn:180,winter:270}[k];
+  const diff=ms=>((sunLon(ms)-target+540)%360)-180;
+  for(let dd=0;dd<=365;dd++){ if(diff(msOf(dd,0))<0&&diff(msOf(dd+1,0))>=0) return seasonDayCache[k]=dd; }
+  return seasonDayCache[k]=0;
+}
+
+// ================= 状態 =================
+let day=0, minute=12*60, place="tokyo", playing=false, speed=30, showSeason=true, showRay=true;
+const records=[];
+
+// ================= 3D =================
+const host=document.getElementById("scene");
+let three=null;
+const S=2;             // 1m ＝ 2 単位
+const DOME=11, GROUND=12.5;
+const enu=(alt,az,r)=>{const a=alt*DEG,z=az*DEG;return new THREE.Vector3(r*Math.cos(a)*Math.sin(z), r*Math.sin(a), -r*Math.cos(a)*Math.cos(z));};
+function init3D(){
+  if(!window.THREE||!THREE.OrbitControls){const d=document.createElement("div");d.className="nogl";d.textContent="3D図を表示できませんでした。はじめて使うときは、電波（インターネット）のある所で開いてください。記録用紙と数値は使えます。";host.appendChild(d);return null;}
+  const renderer=new THREE.WebGLRenderer({antialias:true});
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+  host.prepend(renderer.domElement);
+  const scene=new THREE.Scene();
+  const camera=new THREE.PerspectiveCamera(45,1,0.1,500);
+  const amb=new THREE.AmbientLight(0xffffff,0.45); scene.add(amb);
+  const sunL=new THREE.DirectionalLight(0xffffff,0.8); scene.add(sunL);
+  const ground=new THREE.Mesh(new THREE.CircleGeometry(GROUND,96),new THREE.MeshLambertMaterial({color:0xcfc3a0}));
+  ground.rotation.x=-Math.PI/2; scene.add(ground);
+  const lineMat=new THREE.LineBasicMaterial({color:0x7a6f55,transparent:true,opacity:.55});
+  const seg=(a,b)=>{const g=new THREE.BufferGeometry().setFromPoints([a,b]);scene.add(new THREE.Line(g,lineMat));};
+  seg(new THREE.Vector3(-GROUND,0.01,0),new THREE.Vector3(GROUND,0.01,0));
+  seg(new THREE.Vector3(0,0.01,-GROUND),new THREE.Vector3(0,0.01,GROUND));
+  for(let r=1;r<=6;r++){const pts=[];for(let i=0;i<=96;i++){const a=i/96*TAU;pts.push(new THREE.Vector3(r*S*Math.cos(a),0.01,r*S*Math.sin(a)));}
+    scene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts),new THREE.LineBasicMaterial({color:0x7a6f55,transparent:true,opacity:.25})));}
+  function label(text,color,size){const c=document.createElement("canvas");c.width=128;c.height=128;const x=c.getContext("2d");
+    x.font=`900 88px 'Zen Maru Gothic','BIZ UDPGothic',sans-serif`;x.textAlign="center";x.textBaseline="middle";x.lineWidth=10;x.strokeStyle="rgba(255,255,255,.9)";x.strokeText(text,64,68);x.fillStyle=color;x.fillText(text,64,68);
+    const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(c),depthTest:false,transparent:true}));sp.scale.set(size,size,1);sp.renderOrder=5;scene.add(sp);return sp;}
+  label("北","#2b3448",1.8).position.set(0,0.6,-GROUND-0.8);
+  label("南","#c0392b",1.8).position.set(0,0.6,GROUND+0.8);
+  label("東","#2b3448",1.8).position.set(GROUND+0.8,0.6,0);
+  label("西","#2b3448",1.8).position.set(-GROUND-0.8,0.6,0);
+  scene.add(new THREE.Mesh(new THREE.SphereGeometry(DOME,48,24,0,TAU,0,Math.PI/2),new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.08,side:THREE.DoubleSide,depthWrite:false})));
+  scene.add(new THREE.Mesh(new THREE.SphereGeometry(DOME,24,12,0,TAU,0,Math.PI/2),new THREE.MeshBasicMaterial({color:0xffffff,wireframe:true,transparent:true,opacity:.12})));
+  const stick=new THREE.Mesh(new THREE.CylinderGeometry(0.07,0.07,S,16),new THREE.MeshLambertMaterial({color:0xf4f1ea}));
+  stick.position.y=S/2; scene.add(stick);
+  const tip=new THREE.Mesh(new THREE.SphereGeometry(0.12,16,12),new THREE.MeshLambertMaterial({color:0xd9482b}));
+  tip.position.y=S; scene.add(tip);
+  const shadow=new THREE.Mesh(new THREE.PlaneGeometry(1,0.16),new THREE.MeshBasicMaterial({color:0x2b2b2b,transparent:true,opacity:.78}));
+  shadow.rotation.x=-Math.PI/2; scene.add(shadow);
+  const shadowTip=new THREE.Mesh(new THREE.CircleGeometry(0.16,20),new THREE.MeshBasicMaterial({color:0x1a1a1a}));
+  shadowTip.rotation.x=-Math.PI/2; scene.add(shadowTip);
+  const sun=new THREE.Mesh(new THREE.SphereGeometry(0.6,24,16),new THREE.MeshBasicMaterial({color:0xffc62e}));
+  scene.add(sun);
+  const glowC=document.createElement("canvas");glowC.width=glowC.height=128;{const x=glowC.getContext("2d");const g=x.createRadialGradient(64,64,6,64,64,64);g.addColorStop(0,"rgba(255,220,110,.9)");g.addColorStop(1,"rgba(255,200,60,0)");x.fillStyle=g;x.fillRect(0,0,128,128);}
+  const glow=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(glowC),depthWrite:false,transparent:true}));glow.scale.set(3.4,3.4,1);scene.add(glow);
+  const ray=new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(),new THREE.Vector3()]),new THREE.LineDashedMaterial({color:0xe08a00,dashSize:.35,gapSize:.2}));
+  scene.add(ray);
+  function pathLine(color){const l=new THREE.Line(new THREE.BufferGeometry(),new THREE.LineBasicMaterial({color}));scene.add(l);return l;}
+  const pathToday=pathLine(0xffd23f), pSummer=pathLine(0xe8563a), pEq=pathLine(0x39b36f), pWinter=pathLine(0x3f7fe6);
+  const controls=new THREE.OrbitControls(camera,renderer.domElement);
+  controls.enableDamping=true;controls.enablePan=false;controls.minDistance=5;controls.maxDistance=80;controls.maxPolarAngle=Math.PI*0.495;
+  controls.target.set(0,1.2,0);
+  host.addEventListener("wheel",e=>{if(!e.ctrlKey&&!e.metaKey)e.stopPropagation();},{capture:true});
+  return {renderer,scene,camera,controls,amb,sunL,sun,glow,shadow,shadowTip,ray,pathToday,pSummer,pEq,pWinter,ground};
+}
+three=init3D();
+
+function setView(mode){
+  if(!three)return;
+  const {camera,controls}=three;
+  document.querySelectorAll(".views [aria-pressed]").forEach(b=>b.setAttribute("aria-pressed","false"));
+  controls.target.set(0,1.2,0);
+  // スマホの縦長の枠でも全体が入るよう、元より少し遠くから見る
+  if(mode==="top"){camera.position.set(0,38,0.01);document.getElementById("vTop").setAttribute("aria-pressed","true");}
+  else if(mode==="south"){camera.position.set(0,5,34);document.getElementById("vSouth").setAttribute("aria-pressed","true");}
+  else{camera.position.set(18,15,25);document.getElementById("vDiag").setAttribute("aria-pressed","true");}
+  controls.update();
+}
+document.getElementById("vDiag").onclick=()=>setView("diag");
+document.getElementById("vTop").onclick=()=>setView("top");
+document.getElementById("vSouth").onclick=()=>setView("south");
+function zoom(f){if(!three)return;const {camera,controls}=three;const off=camera.position.clone().sub(controls.target);const d=Math.min(controls.maxDistance,Math.max(controls.minDistance,off.length()*f));camera.position.copy(controls.target).add(off.setLength(d));controls.update();}
+document.getElementById("zIn").onclick=()=>zoom(0.8);
+document.getElementById("zOut").onclick=()=>zoom(1.25);
+
+function pathPts(d,pk){const P=PLACES[pk],pts=[];for(let m=0;m<=1440;m+=6){const s=sunAltAz(msOf(d,m),P.lat,P.lon);if(s.alt>=-1)pts.push(enu(Math.max(s.alt,0),s.az,DOME));}return pts;}
+let pathKey="";
+function updatePaths(){
+  if(!three)return;
+  const key=day+place+showSeason; if(key===pathKey)return; pathKey=key;
+  three.pathToday.geometry.dispose();three.pathToday.geometry=new THREE.BufferGeometry().setFromPoints(pathPts(day,place));
+  const sets=[[three.pSummer,"summer"],[three.pEq,"spring"],[three.pWinter,"winter"]];
+  sets.forEach(([l,k])=>{l.visible=showSeason;if(showSeason){l.geometry.dispose();l.geometry=new THREE.BufferGeometry().setFromPoints(pathPts(seasonDay(k),place));}});
+}
+function update3D(s){
+  if(!three)return;
+  const T=three, up=s.alt>0;
+  const sv=enu(s.alt,s.az,DOME);
+  T.sun.position.copy(sv); T.glow.position.copy(sv); T.sun.visible=T.glow.visible=s.alt>-1;
+  const k=Math.max(0,Math.min(1,(s.alt+6)/16));
+  const night=new THREE.Color(0x14203d), dusk=new THREE.Color(0xe7a36e), day_=new THREE.Color(0x8cc4ee);
+  T.scene.background=s.alt<=-6?night:(s.alt<0?night.clone().lerp(dusk,(s.alt+6)/6):(s.alt<6?dusk.clone().lerp(day_,s.alt/6):day_));
+  T.sunL.position.copy(sv); T.sunL.intensity=up?0.35+0.6*Math.min(1,s.alt/30):0;
+  T.amb.intensity=0.2+0.3*k;
+  if(up){
+    const L=Math.min(S/Math.tan(s.alt*DEG),GROUND);
+    const dx=-Math.sin(s.az*DEG), dz=Math.cos(s.az*DEG);
+    T.shadow.visible=T.shadowTip.visible=true;
+    T.shadow.scale.x=L; T.shadow.position.set(dx*L/2,0.02,dz*L/2);
+    T.shadow.rotation.set(-Math.PI/2,0,Math.atan2(-dz,dx));
+    T.shadowTip.position.set(dx*L,0.021,dz*L);
+    T.ray.visible=showRay;
+    if(showRay){T.ray.geometry.setFromPoints([sv,new THREE.Vector3(0,S,0),new THREE.Vector3(dx*L,0.03,dz*L)]);T.ray.computeLineDistances();}
+  }else{T.shadow.visible=T.shadowTip.visible=T.ray.visible=false;}
+}
+
+// ================= 記録用紙（2D） =================
+const paper=document.getElementById("paper"), pctx=paper.getContext("2d");
+function fitPaper(){const dpr=Math.min(window.devicePixelRatio||1,2);const w=paper.clientWidth,h=paper.clientHeight;paper.width=Math.round(w*dpr);paper.height=Math.round(h*dpr);}
+const cssVar=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+function tipsOfDay(d,pk){
+  const P=PLACES[pk],pts=[];
+  for(let h=4;h<=20;h++){const s=sunAltAz(msOf(d,h*60),P.lat,P.lon);if(s.alt>2){const L=1/Math.tan(s.alt*DEG);pts.push({h,x:-Math.sin(s.az*DEG)*L,y:Math.cos(s.az*DEG)*L});}}
+  return pts;
+}
+function drawPaper(s){
+  const W=paper.width,H=paper.height,c=pctx,f=W/360;
+  if(!W||!H) return;
+  const cx=W/2,cy=H/2,R=Math.min(W,H)/2-22*f,pm=R/3;   // 半径3mまで
+  c.clearRect(0,0,W,H);
+  c.fillStyle=cssVar("--surface2")||"#f5f6f8";c.fillRect(0,0,W,H);
+  c.save();c.beginPath();c.rect(0,0,W,H);c.clip();
+  c.strokeStyle="rgba(120,130,150,.35)";c.lineWidth=1*f;
+  for(let r=1;r<=3;r++){c.beginPath();c.arc(cx,cy,r*pm,0,TAU);c.stroke();}
+  c.beginPath();c.moveTo(cx-R-10*f,cy);c.lineTo(cx+R+10*f,cy);c.moveTo(cx,cy-R-10*f);c.lineTo(cx,cy+R+10*f);c.stroke();
+  c.fillStyle=cssVar("--muted")||"#666";c.font=`${12*f}px 'BIZ UDPGothic',sans-serif`;c.textAlign="left";c.textBaseline="bottom";
+  for(let r=1;r<=3;r++)c.fillText(r+"m",cx+r*pm*0.71+2*f,cy-r*pm*0.71);
+  c.font=`900 ${17*f}px 'Zen Maru Gothic',sans-serif`;c.textAlign="center";c.textBaseline="middle";c.fillStyle=cssVar("--ink")||"#222";
+  c.fillText("北",cx,12*f);c.fillText("東",W-11*f,cy);c.fillText("西",11*f,cy);c.fillStyle="#c0392b";c.fillText("南",cx,H-12*f);
+  const X=x=>cx+x*pm, Y=y=>cy+y*pm;
+  records.forEach(r=>{c.strokeStyle=r.color;c.fillStyle=r.color;c.globalAlpha=.75;c.lineWidth=1.5*f;c.beginPath();r.pts.forEach((p,i)=>i?c.lineTo(X(p.x),Y(p.y)):c.moveTo(X(p.x),Y(p.y)));c.stroke();
+    r.pts.forEach(p=>{c.beginPath();c.arc(X(p.x),Y(p.y),3*f,0,TAU);c.fill();});c.globalAlpha=1;});
+  const P=PLACES[place];
+  c.strokeStyle="rgba(60,60,60,.55)";c.lineWidth=1.2*f;c.setLineDash([4*f,4*f]);c.beginPath();let on=false;
+  for(let m=180;m<=1260;m+=5){const t=sunAltAz(msOf(day,m),P.lat,P.lon);if(t.alt>2){const L=1/Math.tan(t.alt*DEG);const x=X(-Math.sin(t.az*DEG)*L),y=Y(Math.cos(t.az*DEG)*L);on?c.lineTo(x,y):c.moveTo(x,y);on=true;}}
+  c.stroke();c.setLineDash([]);
+  const tips=tipsOfDay(day,place);
+  c.font=`700 ${12*f}px 'BIZ UDPGothic',sans-serif`;
+  tips.forEach(p=>{const x=X(p.x),y=Y(p.y);c.fillStyle="#333";c.beginPath();c.arc(x,y,3.2*f,0,TAU);c.fill();
+    if(Math.hypot(p.x,p.y)<3.2&&p.h%3===0){c.fillStyle=cssVar("--ink")||"#222";c.fillText(p.h+"時",x,y-10*f);}});
+  if(s.alt>0){
+    const L=1/Math.tan(s.alt*DEG), ex=-Math.sin(s.az*DEG)*L, ey=Math.cos(s.az*DEG)*L;
+    c.strokeStyle="#222";c.lineWidth=5*f;c.lineCap="round";c.beginPath();c.moveTo(cx,cy);c.lineTo(X(ex),Y(ey));c.stroke();
+    const sx=cx+Math.sin(s.az*DEG)*(R+4*f), sy=cy-Math.cos(s.az*DEG)*(R+4*f);
+    c.fillStyle="#f5b52e";c.beginPath();c.arc(sx,sy,8*f,0,TAU);c.fill();c.strokeStyle="#c98600";c.lineWidth=1.5*f;c.stroke();
+  }
+  c.fillStyle="#d9482b";c.beginPath();c.arc(cx,cy,5*f,0,TAU);c.fill();
+  c.restore();
+}
+function renderRecList(){
+  document.getElementById("recList").innerHTML=records.map(r=>`<span><i style="background:${r.color}"></i>${r.label}</span>`).join("");
+}
+const REC_COLORS=["#e0533d","#2f6fd0","#2e9a5f","#8a5cd6","#d98a00","#1f9e8f","#c2418f","#6b7280"];
+document.getElementById("recAdd").onclick=()=>{
+  const md=mdOf(day), used=records.map(r=>r.color), color=REC_COLORS.find(c=>!used.includes(c))||REC_COLORS[0];
+  const label=`${PLACES[place].name} ${md.m}/${md.d}`;
+  if(records.some(r=>r.label===label))return;
+  if(records.length>=8)records.shift();
+  records.push({place,label,color,pts:tipsOfDay(day,place)});renderRecList();
+};
+document.getElementById("recClear").onclick=()=>{records.length=0;renderRecList();};
+
+// ================= 数値・説明・季節表 =================
+const $=id=>document.getElementById(id);
+function updateText(s){
+  const md=mdOf(day);
+  $("dateLabel").textContent=`${md.m}月${md.d}日 ${hm(minute)}`;
+  $("placeLabel").textContent=PLACES[place].name;
+  const info=dayInfo(day,place);
+  $("fAlt").innerHTML=s.alt>0?`${s.alt.toFixed(0)}°`:`<small>しずんでいる</small>`;
+  $("fAz").innerHTML=s.alt>-0.833?`${dir16(s.az)}`:"—";
+  if(s.alt>0){const L=1/Math.tan(s.alt*DEG);$("fLen").innerHTML=L>20?`<small>とても長い</small>`:`約${L.toFixed(2)}m`;$("fDir").textContent=dir16(s.az+180);}
+  else{$("fLen").innerHTML=`<small>かげはできない</small>`;$("fDir").textContent="—";}
+  $("fRise").innerHTML=info.rise!=null?`${hm(info.rise)} <small>${dir16(info.riseAz)}</small>`:"—";
+  $("fSet").innerHTML=info.set!=null?`${hm(info.set)}`:"—";
+  $("fNoon").innerHTML=`${hm(info.noon)} <small>高さ${info.noonAlt.toFixed(0)}°</small>`;
+  $("fDay").innerHTML=info.rise!=null&&info.set!=null?durTxt(info.set-info.rise):"—";
+  let why;
+  if(s.alt<=0) why="太陽が地平線の下にあるので、かげはできません。";
+  else{
+    const L=1/Math.tan(s.alt*DEG);
+    why=`かげは、太陽と反対の <b>${dir16(s.az+180)}</b> 側にできます。太陽の高さが約${s.alt.toFixed(0)}°なので、1mの棒のかげは約${L>20?"20m以上":L.toFixed(2)+"m"}です。太陽が高いほど、かげは短くなります。`;
+    if(Math.abs(minute-info.noon)<=10) why+=" いまは南中のころで、かげがいちばん短く、ほぼ真北を向きます。";
+  }
+  $("whyText").innerHTML=why;
+}
+let seasonKey="";
+function updateSeasonTable(){
+  if(seasonKey===place)return; seasonKey=place;
+  $("seasonPlace").textContent=`${PLACES[place].name}（北緯${PLACES[place].lat.toFixed(1)}°）・1mの棒`;
+  const rows=[["summer","夏至","--summer"],["spring","春分・秋分","--equinox"],["winter","冬至","--winter"]];
+  $("seasonBody").innerHTML=rows.map(([k,n,v])=>{
+    const d=seasonDay(k), i=dayInfo(d,place);
+    const L=1/Math.tan(i.noonAlt*DEG), len=i.set-i.rise, off=90-i.riseAz;
+    const rd=Math.abs(off)<1.5?"真東":`東から${Math.abs(off).toFixed(0)}°${off>0?"北":"南"}`;
+    return `<div class="srow" style="border-left-color:var(${v})"><div class="n">${n}</div><dl>
+      <dt>南中高度</dt><dd>${i.noonAlt.toFixed(1)}°</dd><dt>南中のかげ</dt><dd>${L.toFixed(2)}m</dd>
+      <dt>昼の長さ</dt><dd>${durTxt(len)}</dd><dt>日の出の方角</dt><dd>${rd}</dd></dl></div>`;
+  }).join("");
+}
+
+// ================= 操作 =================
+const timeSlider=$("timeSlider"), daySlider=$("daySlider"), playBtn=$("playBtn");
+function setPlaying(p){playing=p;playBtn.textContent=p?"❚❚ とめる":"▶ うごかす";}
+playBtn.onclick=()=>setPlaying(!playing);
+document.querySelectorAll("[data-speed]").forEach(b=>b.onclick=()=>{speed=+b.dataset.speed;document.querySelectorAll("[data-speed]").forEach(x=>x.setAttribute("aria-pressed",x===b?"true":"false"));});
+document.querySelectorAll("[data-place]").forEach(b=>b.onclick=()=>{place=b.dataset.place;document.querySelectorAll("[data-place]").forEach(x=>x.setAttribute("aria-pressed",x===b?"true":"false"));});
+document.querySelectorAll("[data-season]").forEach(b=>b.onclick=()=>{day=seasonDay(b.dataset.season);});
+timeSlider.addEventListener("input",()=>{minute=+timeSlider.value;});
+daySlider.addEventListener("input",()=>{day=+daySlider.value;});
+$("minusDay").onclick=()=>{day=Math.max(0,day-1);};
+$("plusDay").onclick=()=>{day=Math.min(365,day+1);};
+$("todayBtn").onclick=()=>{day=0;};
+$("tgSeason").onclick=e=>{showSeason=!showSeason;e.currentTarget.setAttribute("aria-pressed",String(showSeason));};
+$("tgRay").onclick=e=>{showRay=!showRay;e.currentTarget.setAttribute("aria-pressed",String(showRay));};
+function markSeasonButtons(){
+  document.querySelectorAll("[data-season]").forEach(b=>{b.setAttribute("aria-pressed",String(seasonDay(b.dataset.season)===day));});
+}
+
+let pane="pCtl";
+LabTabs(id=>{pane=id; if(id==="pPaper") requestAnimationFrame(fitPaper);});
+
+// 最初は今日の、今の時刻に近い時間（夜なら正午）
+{const nowMin=Math.floor((Date.now()+9*3600e3)%864e5/60e3);const i=dayInfo(0,place);minute=(i.rise!=null&&nowMin>i.rise+20&&nowMin<i.set-20)?nowMin:12*60;}
+
+function resize(){
+  if(three){const w=host.clientWidth,h=host.clientHeight;three.renderer.setSize(w,h,false);three.camera.aspect=w/h;three.camera.updateProjectionMatrix();}
+  fitPaper();
+}
+new ResizeObserver(resize).observe(host); new ResizeObserver(fitPaper).observe(paper); window.addEventListener("resize",resize);
+resize(); setView("diag");
+let prev=performance.now();
+function loop(now){
+  const dt=Math.min(0.1,(now-prev)/1000); prev=now;
+  if(playing){minute+=dt*speed; if(minute>1230) minute=210;}
+  const P=PLACES[place], s=sunAltAz(msOf(day,minute),P.lat,P.lon);
+  if(document.activeElement!==timeSlider) timeSlider.value=Math.round(minute);
+  if(document.activeElement!==daySlider) daySlider.value=day;
+  updatePaths(); update3D(s);
+  if(three){three.controls.update();three.renderer.render(three.scene,three.camera);}
+  if(pane==="pPaper") drawPaper(s);
+  updateText(s); updateSeasonTable(); markSeasonButtons();
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
