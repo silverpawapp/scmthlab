@@ -1,0 +1,416 @@
+<!doctype html>
+<html lang="ja" data-root="../">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#edf0f5" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0d1221" media="(prefers-color-scheme: dark)">
+<title>てこ｜理科・算数ラボ</title>
+<link rel="manifest" href="../manifest.webmanifest">
+<link rel="icon" href="../icons/icon-192.png">
+<link rel="apple-touch-icon" href="../icons/icon-180.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=Zen+Maru+Gothic:wght@700;900&display=swap">
+<link rel="stylesheet" href="../css/common.css">
+<style>
+:root{--left:#2f6fd0;--right:#c8502d;--ok:#2e9a5f;--wood:#c9a36a;--wood-edge:#8a6a3c;--metal:#8b93a6;--metal-edge:#4e566a;--stand:#6b7489}
+@media (prefers-color-scheme: dark){:root{--left:#7fb0f5;--right:#f0906f;--ok:#5cc98e;--wood:#b08a55;--wood-edge:#e0c28f;--metal:#a3abbe;--metal-edge:#d6dbe6;--stand:#9aa4ba}}
+.stage{height:auto;background:var(--surface2);border:1px solid var(--line)}
+.stage svg{display:block;width:100%;height:auto;touch-action:manipulation}
+.stats3{display:grid;grid-template-columns:1fr 1.25fr 1fr;gap:6px}
+.stats3 .fact{text-align:center;padding:4px 6px}
+.stats3 .v{font-family:var(--f-head);font-weight:900;font-size:19px;color:var(--accent-ink)}
+.stats3 .j .v{font-size:17px}
+.L{color:var(--left);font-weight:700}.R{color:var(--right);font-weight:700}
+.lrow{display:grid;grid-template-columns:2em minmax(0,1fr);gap:4px 8px;align-items:center;background:var(--surface2);border-radius:10px;padding:7px 10px;margin:0 0 6px;font-variant-numeric:tabular-nums}
+.lrow .nm{font-weight:700}
+.lrow .fx{font-size:15px;line-height:1.5;overflow-wrap:anywhere}
+.lrow .fx b{font-family:var(--f-head);font-size:19px}
+.bar{grid-column:2;position:relative;height:12px;background:var(--line);border-radius:6px;overflow:hidden}
+.bar i{position:absolute;left:0;top:0;bottom:0;border-radius:6px;transition:width .3s}
+.why p{margin:0 0 6px}.why p:last-child{margin:0}
+.presets{display:flex;flex-wrap:wrap;gap:6px}
+.presets button{min-height:42px;border-radius:10px;border:1px solid var(--line);background:var(--surface);padding:0 10px;font-size:14px;cursor:pointer}
+.found{background:var(--surface2);border-radius:10px;padding:8px 10px;font-size:15px;line-height:1.6}
+.found b{font-family:var(--f-head);font-size:18px;color:var(--accent-ink)}
+table.rec{width:100%;border-collapse:collapse;font-size:14px;font-variant-numeric:tabular-nums}
+table.rec th,table.rec td{border-bottom:1px solid var(--line);padding:5px 4px;text-align:left}
+table.rec th{color:var(--muted);font-size:13px}
+.recwrap{max-height:200px;overflow:auto;border-radius:10px;background:var(--surface2);padding:2px 6px}
+.empty{color:var(--muted);font-size:14px;padding:8px 4px}
+#graph{display:block;width:100%;height:auto;background:var(--surface2);border-radius:10px}
+.strip{display:grid;grid-template-columns:repeat(11,minmax(0,1fr));gap:2px;font-variant-numeric:tabular-nums}
+.strip div{background:var(--surface2);border-radius:6px;padding:4px 0;text-align:center;font-size:11px;line-height:1.35;min-width:0}
+.strip div b{display:block;font-size:14px}
+.strip .cur{outline:2px solid var(--accent);outline-offset:-2px}
+.strip .eq{background:var(--ok);color:#fff}
+.note{font-size:13px;color:var(--muted);line-height:1.6;margin:0}
+.btn:disabled{opacity:.45}
+svg text{font-family:var(--f-body)}
+.hitr{fill:transparent;cursor:pointer;outline:none}
+.hitr:active{fill:var(--accent);fill-opacity:.15}
+.hitr:focus-visible{stroke:var(--focus);stroke-width:3}
+.mode .btn[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#1b1400}
+h3{font-family:var(--f-head);font-size:16px;margin:4px 0 0}
+</style>
+</head>
+<body>
+<div id="app">
+  <header class="topbar">
+    <a class="backbtn" href="../">＜ メニュー</a>
+    <h1>てこ</h1>
+  </header>
+
+  <section class="stage" aria-label="てこの図">
+    <svg id="lever" viewBox="0 30 600 380" role="group" aria-label="てこの図"></svg>
+  </section>
+
+  <section class="status" aria-label="結果">
+    <div class="stats3">
+      <div class="fact"><div class="k"><span class="L">左</span>の重さ</div><div class="v" id="st-wl"></div></div>
+      <div class="fact j"><div class="k">てこは</div><div class="v" id="st-j" aria-live="polite"></div></div>
+      <div class="fact"><div class="k"><span class="R">右</span>の重さ</div><div class="v" id="st-wr"></div></div>
+    </div>
+  </section>
+
+  <div class="tabs" role="tablist" aria-label="モード">
+    <button role="tab" data-pane="p1">① つり合いを調べる</button>
+    <button role="tab" data-pane="p2">② <ruby>支点<rt>してん</rt></ruby>を動かす</button>
+  </div>
+
+  <!-- ① -->
+  <div class="pane" id="p1" role="tabpanel">
+    <section class="panel">
+      <div class="lbl">図の目もりをタップすると</div>
+      <div class="grid2 mode">
+        <button class="btn" data-mode="add" aria-pressed="true">＋ おもりをつける</button>
+        <button class="btn" data-mode="remove" aria-pressed="false">− おもりをはずす</button>
+      </div>
+      <div class="grid3">
+        <button class="btn" data-clear="L">左を全部<br>はずす</button>
+        <button class="btn" data-clear="R">右を全部<br>はずす</button>
+        <button class="btn" data-clear="all">全部<br>はずす</button>
+      </div>
+      <button class="btn hideBtn" aria-pressed="false">数をかくす（予想してから見る）</button>
+      <p class="hint">おもりは1個10g。1つの目もりに6個（60g）までつるせます。</p>
+    </section>
+    <div class="slot"></div>
+    <section class="panel">
+      <h2>やってみよう</h2>
+      <div class="presets" id="presets1"></div>
+    </section>
+    <section class="panel">
+      <h2>つり合いの記録</h2>
+      <div class="grid2">
+        <button class="btn" id="b-rec" disabled>つり合ったので<br>記録する</button>
+        <button class="btn" id="b-recclear">記録を消す</button>
+      </div>
+      <div class="recwrap"><table class="rec"><thead><tr><th>#</th><th><span class="L">左</span></th><th><span class="R">右</span></th><th>はたらき</th></tr></thead><tbody id="recbody"></tbody></table><div class="empty" id="recempty">まだ記録はありません。水平につり合ったら「記録する」を押そう。</div></div>
+    </section>
+    <section class="panel">
+      <h2>右の1か所だけでつり合わせよう</h2>
+      <div class="found" id="found"></div>
+      <svg id="graph" viewBox="0 0 340 220" role="img" aria-label="右の目もりとおもりの重さのグラフ"></svg>
+      <p class="hint" id="graphhint"></p>
+    </section>
+    <p class="note">このアプリでは、棒の重さはつり合っている（おもりがないとき水平）とし、支点のまさつは考えません。そのため、はたらきが「ぴったり同じ」ときだけ水平になり、少しでもちがうとかたむきます。本物の実験用てこでは、差がとても小さいとかたむかないことがあります。かたむきの角度は、どちらが大きいかだけを表していて、差の大きさとは関係ありません（本物も、止まるところまでかたむきます）。</p>
+  </div>
+
+  <!-- ② -->
+  <div class="pane" id="p2" role="tabpanel" hidden>
+    <section class="panel">
+      <div class="lbl">図の目もりをタップすると</div>
+      <div class="grid3 mode">
+        <button class="btn" data-mode="add" aria-pressed="true">＋ おもりを<br>つける</button>
+        <button class="btn" data-mode="remove" aria-pressed="false">− おもりを<br>はずす</button>
+        <button class="btn" data-mode="move" aria-pressed="false">▲ 支点を<br>そこへ</button>
+      </div>
+      <div class="grid2">
+        <button class="btn" id="fL">◀ 支点を左へ</button>
+        <button class="btn" id="fR">支点を右へ ▶</button>
+      </div>
+      <div class="grid2">
+        <button class="btn" data-clear="all">全部はずす</button>
+        <button class="btn hideBtn" aria-pressed="false">数をかくす</button>
+      </div>
+      <p class="hint">棒の目もりは左はしから右はしまで12。図の数字は、そのときの支点からのきょり（目もり）です。</p>
+    </section>
+    <div class="slot"></div>
+    <section class="panel">
+      <h2>やってみよう</h2>
+      <div class="presets" id="presets2"></div>
+    </section>
+    <section class="panel">
+      <h2>支点をほかの場所に動かすと？</h2>
+      <div class="strip" id="strip"></div>
+      <p class="hint" id="striphint"></p>
+    </section>
+    <p class="note">ここでは、棒の重さは考えません（とても軽い棒と考えます）。入試では棒に重さがある問題も出ますが、このアプリでは入れていません。</p>
+  </div>
+
+  <!-- ①②で共通：はたらきと「なぜ？」（タブに合わせて移動する） -->
+  <section class="panel" id="shared">
+    <h2>てこをかたむけるはたらき<small>おもりの重さ × 支点からのきょり</small></h2>
+    <div id="mom"></div>
+    <div class="why"><b>なぜ？</b><div id="why"></div></div>
+  </section>
+</div>
+<div id="update" class="update" hidden><span>新しい版があります。</span><button id="updateBtn" type="button">開き直す</button></div>
+
+<script src="../js/common.js"></script>
+<script>
+(function(){
+"use strict";
+// ※ 計算と図のかき方は「てこラボ.html」（①②）と同じ。③問題は入れない
+var UNIT=10, MAXN=6, NH=13, SP=40, X0=60, CY=150;
+var NS="http://www.w3.org/2000/svg";
+var reduce=window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+var $=function(id){return document.getElementById(id);};
+function zeros(){var a=[];for(var i=0;i<NH;i++)a.push(0);return a;}
+function hx(i){return X0+SP*i;}
+
+/* ---------- モデル：穴 0〜12、支点 f ---------- */
+function M(f){return {f:f,w:zeros(),stand:true,labels:"dist",ghost:null,frozen:false,interactive:true};}
+var models={1:M(6),2:M(6)};
+var tab=1, cur=models[1], mode="add", hide=false, recs=[];
+function side(m,s){var t=[];for(var i=0;i<NH;i++){var d=(i-m.f)*s;if(m.w[i]&&d>0)t.push({g:m.w[i]*UNIT,d:d,i:i});}
+  return s<0?t.reverse():t;}
+function mom(m,s){return side(m,s).reduce(function(a,t){return a+t.g*t.d;},0);}
+function wt(m,s){return side(m,s).reduce(function(a,t){return a+t.g;},0);}
+function judge(m){var l=mom(m,-1),r=mom(m,1);return l>r?-1:(l<r?1:0);}
+function fmt(m,s){var t=side(m,s);if(!t.length)return "なし";return t.map(function(x){return x.g+"g×"+x.d;}).join(" ＋ ");}
+function single(m,s){var t=side(m,s);return t.length===1?t[0]:null;}
+function solutions(Mo){var s=[];if(Mo<=0)return s;for(var j=1;j<=6;j++){if(Mo%(UNIT*j)===0){var n=Mo/(UNIT*j);if(n>=1&&n<=MAXN)s.push(j);}}return s;}
+
+/* ---------- てこの図 ---------- */
+var svg=$("lever"),gStand,gBeam,gLab,gW,gPiv,hits=[],ang=0,target=0,last=0,raf=0;
+function el(n,at,p){var e=document.createElementNS(NS,n);for(var k in at)e.setAttribute(k,at[k]);if(p)p.appendChild(e);return e;}
+function build(){
+  el("line",{x1:20,y1:CY,x2:580,y2:CY,stroke:"var(--muted)","stroke-dasharray":"5 6","stroke-width":1,opacity:.5},svg);
+  var tx=el("text",{x:598,y:CY+5,"text-anchor":"end","font-size":16,fill:"var(--muted)"},svg);tx.textContent="水平";
+  gStand=el("g",{},svg);
+  el("rect",{x:-100,y:368,width:200,height:14,rx:5,fill:"var(--stand)"},gStand);
+  el("rect",{x:-8,y:CY,width:16,height:220,rx:3,fill:"var(--stand)"},gStand);
+  gBeam=el("g",{},svg);
+  el("rect",{x:hx(0)-22,y:CY-8,width:hx(12)-hx(0)+44,height:16,rx:4,fill:"var(--wood)",stroke:"var(--wood-edge)","stroke-width":1.5},gBeam);
+  for(var i=0;i<NH;i++){
+    el("line",{x1:hx(i),y1:CY-8,x2:hx(i),y2:CY-2,stroke:"var(--wood-edge)","stroke-width":1.5},gBeam);
+    el("circle",{cx:hx(i),cy:CY+12,r:4,fill:"none",stroke:"var(--metal-edge)","stroke-width":2},gBeam);
+  }
+  gLab=el("g",{},gBeam);
+  gW=el("g",{},svg);
+  gPiv=el("g",{},svg);
+  el("circle",{cx:0,cy:CY,r:7,fill:"var(--surface)",stroke:"var(--stand)","stroke-width":3},gPiv);
+  var ft=el("text",{x:0,y:402,"text-anchor":"middle","font-size":20,fill:"var(--muted)"},gStand);ft.textContent="支点";
+  var gH=el("g",{},svg);
+  for(i=0;i<NH;i++){
+    // スマホで押しやすいよう、となりの目もりとの間いっぱいまで広げる
+    var r=el("rect",{"class":"hitr",width:40,height:170,rx:8,tabindex:0,role:"button"},gH);
+    r.dataset.i=i;hits.push(r);
+    r.addEventListener("click",function(){onHit(+this.dataset.i,mode==="remove"?-1:1);});
+    r.addEventListener("keydown",function(e){
+      if(e.key==="Enter"||e.key===" "){e.preventDefault();onHit(+this.dataset.i,mode==="remove"?-1:1);}
+      else if(e.key==="Delete"||e.key==="Backspace"){e.preventDefault();onHit(+this.dataset.i,-1);}
+    });
+  }
+}
+function tiltMax(m){var arm=SP*Math.max(m.f,12-m.f);return Math.min(20,Math.asin(Math.min(1,95/arm))*180/Math.PI);}
+function hook(i,m,a){var r=a*Math.PI/180,lx=hx(i)-hx(m.f),ly=12;return{x:hx(m.f)+lx*Math.cos(r)-ly*Math.sin(r),y:CY+lx*Math.sin(r)+ly*Math.cos(r)};}
+function labels(){
+  var m=cur,h="";
+  for(var i=0;i<NH;i++){
+    var d=i-m.f,txt,col;
+    if(d===0&&m.stand)continue; txt=String(Math.abs(d)); col=d<0?"var(--left)":"var(--right)";
+    h+='<text x="'+hx(i)+'" y="'+(CY-14)+'" text-anchor="middle" font-size="24" font-weight="700" fill="'+col+'">'+txt+'</text>';
+  }
+  h+='<text x="'+(hx(0)+hx(m.f))/2+'" y="'+(CY-44)+'" text-anchor="middle" font-size="24" font-weight="700" fill="var(--left)">'+(m.f>0?"左":"")+'</text>';
+  h+='<text x="'+(hx(12)+hx(m.f))/2+'" y="'+(CY-44)+'" text-anchor="middle" font-size="24" font-weight="700" fill="var(--right)">'+(m.f<12?"右":"")+'</text>';
+  gLab.innerHTML=h;
+}
+function draw(){
+  var m=cur,fx=hx(m.f);
+  gBeam.setAttribute("transform","rotate("+ang.toFixed(3)+" "+fx+" "+CY+")");
+  gStand.setAttribute("transform","translate("+fx+" 0)");gPiv.setAttribute("transform","translate("+fx+" 0)");
+  var h="";
+  for(var i=0;i<NH;i++){
+    var p=hook(i,m,ang),n=m.w[i],hr=hits[i];
+    hr.setAttribute("x",(p.x-20).toFixed(1));hr.setAttribute("y",(p.y-40).toFixed(1));
+    var d=i-m.f;
+    hr.setAttribute("aria-label",(d===0?"支点の位置":(d<0?"左":"右")+"、支点からのきょり"+Math.abs(d))+"、おもり"+n+"個（"+n*UNIT+"g）");
+    var col=d<0?"var(--left)":(d>0?"var(--right)":"var(--muted)");
+    var y0=p.y+4;
+    if(!n)continue;
+    h+='<line x1="'+p.x.toFixed(1)+'" y1="'+y0.toFixed(1)+'" x2="'+p.x.toFixed(1)+'" y2="'+(y0+14).toFixed(1)+'" stroke="var(--metal-edge)" stroke-width="1.5"/>';
+    for(var k=0;k<n;k++){var y=y0+14+k*15;
+      h+='<rect x="'+(p.x-13).toFixed(1)+'" y="'+y.toFixed(1)+'" width="26" height="14" rx="4" fill="var(--metal)" stroke="var(--metal-edge)" stroke-width="1.2"/>';}
+    h+='<text x="'+p.x.toFixed(1)+'" y="'+(y0+14+n*15+19).toFixed(1)+'" text-anchor="middle" font-size="19" font-weight="700" fill="'+col+'">'+n*UNIT+'g</text>';
+  }
+  gW.innerHTML=h;
+}
+function tick(t){
+  var dt=last?Math.min(0.05,(t-last)/1000):0.016;last=t;
+  var d=target-ang;
+  if(reduce||Math.abs(d)<0.05){ang=target;}else{ang+=d*(1-Math.exp(-dt/0.13));}
+  draw();
+  if(ang!==target){raf=requestAnimationFrame(tick);}else{raf=0;last=0;}
+}
+function animate(){target=judge(cur)*tiltMax(cur);if(!raf){last=0;raf=requestAnimationFrame(tick);}}
+
+/* ---------- 操作 ---------- */
+var flashMsg="";
+function flash(msg){flashMsg=msg;renderWhy();setTimeout(function(){if(flashMsg===msg){flashMsg="";renderWhy();}},2200);}
+function onHit(i,d){
+  if(mode==="move"&&d>0){moveF(i);return;}
+  if(i===cur.f){flash("ここは支点です。支点にはおもりをつるせません。");return;}
+  var n=cur.w[i]+d;
+  if(n<0){flash("ここにはおもりがありません。");return;}
+  if(n>MAXN){flash("1つの目もりには6個（60g）までです。");return;}
+  cur.w[i]=n;update();
+}
+function moveF(i){
+  if(i<1||i>11){flash("支点は、はしから1目もり以上内側に置こう。");return;}
+  if(cur.w[i]){flash("おもりがある目もりには、支点を置けません。");return;}
+  cur.f=i;ang=0;update();
+}
+$("fL").onclick=function(){var i=cur.f-1;while(i>=1&&cur.w[i])i--;if(i>=1)moveF(i);else flash("これより左には動かせません。");};
+$("fR").onclick=function(){var i=cur.f+1;while(i<=11&&cur.w[i])i++;if(i<=11)moveF(i);else flash("これより右には動かせません。");};
+function setMode(m){mode=m;[].forEach.call(document.querySelectorAll(".mode button"),function(b){b.setAttribute("aria-pressed",String(b.dataset.mode===m));});}
+[].forEach.call(document.querySelectorAll(".mode"),function(g){g.addEventListener("click",function(e){var b=e.target.closest("button");if(b)setMode(b.dataset.mode);});});
+[].forEach.call(document.querySelectorAll("[data-clear]"),function(b){b.onclick=function(){
+  var c=b.dataset.clear;for(var i=0;i<NH;i++){var d=i-cur.f;if(c==="all"||(c==="L"&&d<0)||(c==="R"&&d>0))cur.w[i]=0;}update();};});
+[].forEach.call(document.querySelectorAll(".hideBtn"),function(b){b.onclick=function(){hide=!hide;
+  [].forEach.call(document.querySelectorAll(".hideBtn"),function(x){x.setAttribute("aria-pressed",String(hide));});update();};});
+
+function preset(box,list,tabNo){list.forEach(function(p){
+  var b=document.createElement("button");b.textContent=p.name;
+  b.onclick=function(){var m=models[tabNo];m.w=zeros();m.f=p.f||6;for(var k in p.w)m.w[k]=p.w[k];ang=0;setMode("add");update();};
+  $(box).appendChild(b);});}
+preset("presets1",[
+  {name:"左の3に20g",w:{3:2}},
+  {name:"左の4に30g",w:{2:3}},
+  {name:"左の5に10g",w:{1:1}},
+  {name:"左の6に10g と 1に40g",w:{0:1,5:4}},
+  {name:"左の1に10g と 6に30g",w:{5:1,0:3}}
+],1);
+preset("presets2",[
+  {name:"両はしに30gと60g",w:{0:3,12:6}},
+  {name:"左はし10g・右はし50g",w:{0:1,12:5}},
+  {name:"左はし40g・右はし20g",w:{0:4,12:2}},
+  {name:"3つのおもり（20g・20g・40g）",w:{0:2,4:2,12:4}}
+],2);
+
+/* ---------- 記録（①） ---------- */
+$("b-rec").onclick=function(){
+  var m=models[1];if(judge(m)!==0||!mom(m,-1))return;
+  var k=m.w.join(",");
+  if(recs.some(function(r){return r.key===k;})){flash("この組み合わせは、もう記録しています。");return;}
+  recs.push({key:k,L:fmt(m,-1),R:fmt(m,1),m:mom(m,-1),r1:single(m,1)});
+  update();flash("記録しました！");
+};
+$("b-recclear").onclick=function(){recs=[];update();};
+
+/* ---------- 表示 ---------- */
+function renderStats(){
+  var m=cur,j=judge(m),wl=wt(m,-1),wr=wt(m,1),ml=mom(m,-1),mr=mom(m,1),mx=Math.max(ml,mr,1);
+  $("st-wl").textContent=wl+" g";$("st-wr").textContent=wr+" g";
+  $("st-j").textContent=(!wl&&!wr)?"水平":(j<0?"左にかたむく":(j>0?"右にかたむく":"水平につり合う"));
+  var q=function(v){return hide?"？":String(v);};
+  $("mom").innerHTML=
+    '<div class="lrow"><span class="nm L">左</span><span class="fx">'+(hide?"？":fmt(m,-1))+' ＝ <b>'+q(ml)+'</b></span><div class="bar"><i style="width:'+(hide?0:ml/mx*100)+'%;background:var(--left)"></i></div></div>'+
+    '<div class="lrow"><span class="nm R">右</span><span class="fx">'+(hide?"？":fmt(m,1))+' ＝ <b>'+q(mr)+'</b></span><div class="bar"><i style="width:'+(hide?0:mr/mx*100)+'%;background:var(--right)"></i></div></div>';
+  $("b-rec").disabled=!(tab===1&&j===0&&ml>0);
+}
+function gcd(a,b){return b?gcd(b,a%b):a;}
+function renderWhy(){
+  var m=cur,ml=mom(m,-1),mr=mom(m,1),wl=wt(m,-1),wr=wt(m,1),j=judge(m),h=[];
+  if(flashMsg)h.push('<p><b>'+flashMsg+'</b></p>');
+  if(hide){
+    h.push("<p>今は数をかくしています。図のかたむきを見て、左右それぞれ「重さ×きょり」を自分で計算してみよう。</p>");
+  }else if(!wl&&!wr){
+    h.push("<p>てこをかたむけるはたらきは「おもりの重さ × 支点からのきょり（目もり）」で表せます。左右のはたらきが同じになると、てこは水平につり合います。</p><p>図の目もりをタップしておもりをつるすか、「やってみよう」から選ぼう。</p>");
+  }else if(j===0){
+    h.push('<p>左は '+fmt(m,-1)+' ＝ '+ml+'、右は '+fmt(m,1)+' ＝ '+mr+'。左右のはたらきが同じなので、水平につり合います。</p>');
+    var a=single(m,-1),b=single(m,1);
+    if(tab===2&&a&&b&&a.g!==b.g){var g1=gcd(a.g,b.g),g2=gcd(a.d,b.d);
+      h.push('<p>重さの比は 左:右 ＝ '+a.g/g1+':'+b.g/g1+'、支点からのきょりの比は 左:右 ＝ '+a.d/g2+':'+b.d/g2+'。重さの比を<b>逆</b>にしたきょりのところに支点を置くと、つり合います。</p>');}
+    else if(wl!==wr)h.push('<p>おもりの重さは左 '+wl+'g、右 '+wr+'g でちがうのに、つり合っています。支点から遠いほど、軽いおもりでも大きくかたむけられるからです。</p>');
+  }else{
+    var big=j<0?"左":"右";
+    h.push('<p>はたらきは左 '+ml+'、右 '+mr+' で、'+big+'のほうが大きいので、'+big+'にかたむきます。</p>');
+    if((j<0&&wl<wr)||(j>0&&wr<wl))h.push('<p>おもりの重さは'+big+'のほうが軽いのに、'+big+'にかたむいています。重さだけでなく、支点からのきょりも関係するからです。</p>');
+    if(tab===2)h.push('<p>支点を'+big+'へ動かすと、'+big+'のきょりが短くなって、はたらきが小さくなります。</p>');
+    else h.push('<p>あと '+Math.abs(ml-mr)+' 分のはたらきを、'+(j<0?"右":"左")+'に足すか、'+big+'から減らすとつり合います。</p>');
+  }
+  $("why").innerHTML=h.join("");
+}
+function renderRecs(){
+  var tb=$("recbody");tb.innerHTML="";
+  recs.forEach(function(r,i){var tr=document.createElement("tr");
+    tr.innerHTML="<td>"+(i+1)+"</td><td>"+r.L+"</td><td>"+r.R+"</td><td>"+r.m+" ＝ "+r.m+"</td>";tb.appendChild(tr);});
+  $("recempty").style.display=recs.length?"none":"block";
+}
+function foundJ(Mo){var s={};recs.forEach(function(r){if(r.m===Mo&&r.r1)s[r.r1.d]=r.r1.g;});return s;}
+function renderFound(){
+  var m=models[1],Mo=mom(m,-1),box=$("found");
+  if(!Mo){box.innerHTML="左におもりをつるすと、右の1か所だけでつり合わせる方法が何通りあるかを数えます。";return;}
+  var sol=solutions(Mo),f=foundJ(Mo),k=Object.keys(f).length;
+  if(!sol.length){box.innerHTML="左のはたらきは <b>"+(hide?"？":Mo)+"</b>。右の1か所だけでは、つり合わせられません（1か所に6個まで・目もりは6まで）。右の2か所に分けてつるしてみよう。";return;}
+  box.innerHTML="左のはたらきが <b>"+(hide?"？":Mo)+"</b> のとき、右の1か所だけでつり合わせる方法は全部で <b>"+sol.length+"</b> 通り。記録して見つけたのは <b>"+k+"</b> 通り。"+(k===sol.length?" 全部見つけました！":"");
+}
+function renderGraph(){
+  var m=models[1],g=$("graph"),Mo=mom(m,-1),x0=44,x1=326,y0=186,y1=30;
+  var X=function(j){return x0+j/6.5*(x1-x0);},Y=function(w){return y0-(w/(MAXN*UNIT))*(y0-y1);};
+  var h="";
+  for(var w=0;w<=60;w+=10)h+='<line x1="'+x0+'" y1="'+Y(w)+'" x2="'+x1+'" y2="'+Y(w)+'" stroke="var(--line)"/><text x="'+(x0-6)+'" y="'+(Y(w)+4)+'" text-anchor="end" font-size="12" fill="var(--muted)">'+w+'</text>';
+  for(var j=1;j<=6;j++)h+='<text x="'+X(j)+'" y="'+(y0+15)+'" text-anchor="middle" font-size="12" fill="var(--muted)">'+j+'</text>';
+  h+='<line x1="'+x0+'" y1="'+y0+'" x2="'+x1+'" y2="'+y0+'" stroke="var(--muted)"/><line x1="'+x0+'" y1="'+y0+'" x2="'+x0+'" y2="'+y1+'" stroke="var(--muted)"/>';
+  h+='<text x="'+x1+'" y="'+(y0+31)+'" text-anchor="end" font-size="12" fill="var(--muted)">右の目もり</text><text x="6" y="14" font-size="12" fill="var(--muted)">右のおもり（g）</text>';
+  var hint="";
+  if(Mo>0){
+    if(!hide){var xs=Math.max(0.35,Mo/60),pts=[];
+      if(xs<=6.5){for(var i=0;i<=60;i++){var x=xs+(6.5-xs)*i/60;pts.push(X(x).toFixed(1)+","+Y(Mo/x).toFixed(1));}
+        h+='<polyline points="'+pts.join(" ")+'" fill="none" stroke="var(--accent)" stroke-width="2" stroke-dasharray="6 5"/>';}
+      hint="点線は「重さ × 目もり ＝ "+Mo+"」になるところ。目もりが2倍、3倍になると、つり合う重さは2分の1、3分の1になります（<ruby>反比例<rt>はんぴれい</rt></ruby>）。";
+    }else hint="数をかくしているので、点線は出していません。";
+    var f=foundJ(Mo);for(var k in f)h+='<circle cx="'+X(+k)+'" cy="'+Y(f[k])+'" r="6" fill="var(--right)"/>';
+    var t=single(m,1);if(t&&judge(m)===0)h+='<circle cx="'+X(t.d)+'" cy="'+Y(t.g)+'" r="9" fill="none" stroke="var(--right)" stroke-width="2.5"/>';
+    hint+=" 赤い点は記録したつり合い（右の1か所だけのもの）です。";
+  }else hint="左におもりをつるすと、グラフが出ます。";
+  g.innerHTML=h;$("graphhint").innerHTML=hint;
+}
+function renderStrip(){
+  var m=models[2],h="",any=m.w.some(function(n){return n>0;}),eqs=[];
+  for(var f=1;f<=11;f++){
+    var t={f:f,w:m.w},j=judge(t),cls=(f===m.f?"cur":""),sym;
+    if(hide||!any)sym="・";
+    else if(m.w[f])sym="●";
+    else if(j===0){sym="＝";cls+=" eq";eqs.push(f);}
+    else sym=j<0?"左↓":"右↓";
+    h+='<div class="'+cls+'"><b>'+f+'</b>'+sym+'</div>';
+  }
+  $("strip").innerHTML=h;
+  $("striphint").textContent=hide?"数をかくしているので、表は出していません。":(!any?"おもりをつるすと、支点を1〜11のどこに置いたらどうなるかが出ます（数字は左はしからの目もり、わくが今の支点）。":
+    "数字は左はしからの目もり、わくが今の支点。「＝」はつり合う、「左↓」「右↓」はそちらにかたむく、「●」はおもりがある場所です。"+(eqs.length?"「＝」のところに支点を動かしてたしかめよう。":"支点をどこに置いてもつり合いません。おもりを変えてみよう。"));
+}
+function update(){
+  renderStats();renderWhy();
+  if(tab===1){renderRecs();renderFound();renderGraph();}
+  if(tab===2)renderStrip();
+  labels();animate();
+}
+
+/* ---------- タブ ---------- */
+build();
+LabTabs(function(id){
+  tab=id==="p1"?1:2; cur=models[tab]; ang=0;
+  if(mode==="move"&&tab!==2)setMode("add");
+  // 「はたらき」と「なぜ？」の箱を、表示中のタブの操作の下へ移す
+  document.querySelector("#"+id+" .slot").appendChild($("shared"));
+  update();draw();
+});
+})();
+</script>
+</body>
+</html>

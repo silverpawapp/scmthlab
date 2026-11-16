@@ -1,9 +1,10 @@
 /* 電波がなくても使えるようにするしくみ。ファイルを直したら VERSION を上げる */
-const VERSION = "2026-11-16a";
+const VERSION = "2026-11-16b";
 const CACHE = "rikasansu-" + VERSION;
 const SHELL = ["./", "index.html", "manifest.webmanifest", "css/common.css", "js/common.js",
   "icons/icon-180.png", "icons/icon-192.png", "icons/icon-512.png", "icons/icon-maskable-512.png",
-  "moon/", "moon/index.html", "shadow/", "shadow/index.html"];
+  "moon/", "moon/index.html", "shadow/", "shadow/index.html",
+  "teko/", "teko/index.html", "denki/", "denki/index.html"];
 // 3D図の部品（three.js r128）とフォント：最初に電波のある所で開いたときに保存する
 const LIBS = [
   "https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js",

@@ -1,0 +1,694 @@
+<!doctype html>
+<html lang="ja" data-root="../">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#edf0f5" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0d1221" media="(prefers-color-scheme: dark)">
+<title>電気の回路｜理科・算数ラボ</title>
+<link rel="manifest" href="../manifest.webmanifest">
+<link rel="icon" href="../icons/icon-192.png">
+<link rel="apple-touch-icon" href="../icons/icon-180.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=Zen+Maru+Gothic:wght@700;900&display=swap">
+<link rel="stylesheet" href="../css/common.css">
+<style>
+:root{--danger-ink:#8a1449;--danger-soft:#fbe4ee;--wire:#6b7489;--sch:#1b2335;--light:#ffc62e;--ca:#2f6fd0;--cb:#c8502d}
+@media (prefers-color-scheme: dark){:root{--danger-ink:#ffc2dc;--danger-soft:#3a1426;--wire:#9aa4ba;--sch:#e6eaf3;--ca:#7fb0f5;--cb:#f0906f}}
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 10px}
+.card{background:var(--surface);border:2px solid var(--line);border-radius:14px;overflow:hidden;min-width:0;display:flex;flex-direction:column}
+.card.a{border-color:var(--ca)}.card.b{border-color:var(--cb)}
+.pick{display:flex;align-items:center;gap:6px;min-height:52px;padding:4px 8px;border:0;border-bottom:1px solid var(--line);background:var(--surface2);text-align:left;cursor:pointer;width:100%}
+.pick .tag{flex:none;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;color:#fff;font-family:var(--f-head);font-weight:900;font-size:16px}
+.a .tag{background:var(--ca)}.b .tag{background:var(--cb)}
+.pick .nm{flex:1;min-width:0;font-weight:700;font-size:13.5px;line-height:1.35}
+.pick .dd{flex:none;color:var(--muted);font-size:13px}
+.card svg{display:block;width:100%;height:auto;cursor:zoom-in}
+.card .zoom{font-size:12px;color:var(--muted);text-align:center;padding:0 0 4px}
+.sentence{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:8px 12px;font-size:15px;line-height:1.6}
+.sentence b{color:inherit}
+.sentence .ta{color:var(--ca);font-weight:700}.sentence .tb{color:var(--cb);font-weight:700}
+table.cmpt{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+.cmpt th,.cmpt td{border-bottom:1px solid var(--line);padding:8px 4px;vertical-align:top;text-align:left}
+.cmpt thead th{font-family:var(--f-head);font-size:17px}
+.cmpt thead .ha{color:var(--ca)}.cmpt thead .hb{color:var(--cb)}
+.cmpt tbody th{font-size:14px;color:var(--muted);width:30%;font-weight:700}
+.cmpt td{width:35%}
+.cmpt .v{font-family:var(--f-head);font-weight:900;font-size:21px;color:var(--accent-ink);line-height:1.25}
+.cmpt .s{font-size:13px;color:var(--muted)}
+.cmpt .ld{font-size:14px;line-height:1.5}
+.cmpt .ld b{font-family:var(--f-head);font-size:16px;color:var(--accent-ink)}
+.cmpt .dz{color:var(--danger);font-weight:700}
+.q{display:inline-grid;place-items:center;width:28px;height:28px;margin-left:2px;border-radius:50%;border:1px solid var(--line);background:var(--surface2);font-weight:700;font-size:15px;color:var(--ink);cursor:pointer;vertical-align:middle}
+.alert{border:2px solid var(--danger);background:var(--danger-soft);color:var(--ink);border-radius:10px;padding:8px 12px;font-size:15px;line-height:1.6}
+.alert .t{font-weight:700;color:var(--danger-ink)}
+.why p{margin:0 0 6px}.why p:last-child{margin:0}
+.who{font-family:var(--f-head);font-weight:900;font-size:17px}
+.who.a{color:var(--ca)}.who.b{color:var(--cb)}
+.note{font-size:13px;color:var(--muted);line-height:1.6;margin:0}
+.term h3{font-family:var(--f-head);font-size:18px;margin:0}
+.term h3 small{font-family:var(--f-body);font-weight:700;font-size:14px;color:var(--muted);margin-left:6px}
+.term p{margin:0}
+.term ul{margin:0;padding-left:1.2em}.term li{margin:2px 0}
+.water{display:block;width:100%;height:auto;background:var(--surface2);border-radius:10px}
+/* 下から出る画面（回路の一覧・大きな図・ことば） */
+.sheet{position:fixed;inset:0;z-index:40;display:flex;flex-direction:column;justify-content:flex-end;background:rgba(0,0,0,.45)}
+.sheet[hidden]{display:none}
+.sheet .box{background:var(--bg);border-radius:18px 18px 0 0;max-height:88dvh;display:flex;flex-direction:column;max-width:520px;width:100%;margin:0 auto}
+.sheet .hd{display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid var(--line)}
+.sheet .hd h2{flex:1;margin:0;font-family:var(--f-head);font-size:18px}
+.sheet .bd{overflow-y:auto;padding:10px 12px calc(16px + env(safe-area-inset-bottom))}
+.grp{font-family:var(--f-head);font-weight:700;font-size:15px;color:var(--muted);margin:12px 0 6px}
+.grp:first-child{margin-top:0}
+.plist{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.plist button{min-height:52px;border-radius:10px;border:1px solid var(--line);background:var(--surface);padding:4px 8px;font-weight:700;font-size:14px;line-height:1.35;text-align:left;cursor:pointer}
+.plist button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.plist button.dz{border-color:var(--danger);color:var(--danger-ink);background:var(--danger-soft)}
+.plist button.dz[aria-pressed="true"]{background:var(--danger);color:#fff}
+.big svg{display:block;width:100%;height:auto;border-radius:10px;margin:4px 0 10px}
+.big h3{font-family:var(--f-head);font-size:16px;margin:6px 0 0}
+svg text{font-family:var(--f-body)}
+.heat path{animation:heat 0.9s ease-in-out infinite alternate}
+.heat path:nth-child(2){animation-delay:.3s}.heat path:nth-child(3){animation-delay:.6s}
+@keyframes heat{from{transform:translateY(0);opacity:.95}to{transform:translateY(-5px);opacity:.35}}
+@media (min-width:820px) and (min-height:500px){.cmp{grid-area:stage;align-self:start;margin:0 10px 16px}}
+</style>
+</head>
+<body>
+<div id="app">
+  <header class="topbar">
+    <a class="backbtn" href="../">＜ メニュー</a>
+    <h1>電気の回路</h1>
+  </header>
+
+  <section class="cmp stage-like" aria-label="くらべる2つの回路">
+    <div class="card a">
+      <button class="pick" data-pick="A"><span class="tag">A</span><span class="nm" id="nmA">—</span><span class="dd">▼</span></button>
+      <svg id="figA" role="img" aria-label="Aの回路図"></svg>
+      <div class="zoom">図をタップで大きく</div>
+    </div>
+    <div class="card b">
+      <button class="pick" data-pick="B"><span class="tag">B</span><span class="nm" id="nmB">—</span><span class="dd">▼</span></button>
+      <svg id="figB" role="img" aria-label="Bの回路図"></svg>
+      <div class="zoom">図をタップで大きく</div>
+    </div>
+  </section>
+
+  <section class="status"><div class="sentence" id="sentence">—</div></section>
+
+  <div class="tabs" role="tablist" aria-label="表示の切り替え">
+    <button role="tab" data-pane="pCmp">くらべる</button>
+    <button role="tab" data-pane="pWhy">なぜ？</button>
+    <button role="tab" data-pane="pWord">ことば</button>
+  </div>
+
+  <div class="pane" id="pCmp" role="tabpanel">
+    <section class="panel">
+      <table class="cmpt">
+        <thead><tr><th></th><th class="ha">A</th><th class="hb">B</th></tr></thead>
+        <tbody id="cmpBody"></tbody>
+      </table>
+      <p class="hint">「何倍」は、電池1個・電球1個のとき（電流0.3 A）を1としたときの大きさです。<button class="q" data-term="base" aria-label="何倍について">？</button></p>
+    </section>
+  </div>
+
+  <div class="pane" id="pWhy" role="tabpanel" hidden>
+    <section class="panel" id="whyA"></section>
+    <section class="panel" id="whyB"></section>
+    <p class="note">計算は入試と同じ考え方で、電池1個を1.5 V、豆電球とモーターを5 Ω（2.5 V・0.5 A用の豆電球と同じ）としています。本物の電池や電球では、特に並列のとき、少しちがう値になります。モーターの電流は目安です。危ない回路の数値は、電池の中の抵抗を0.2 Ωとして見積もった目安です（電池によって変わります）。</p>
+  </div>
+
+  <div class="pane" id="pWord" role="tabpanel" hidden>
+    <div id="words"></div>
+  </div>
+</div>
+
+<div id="sheet" class="sheet" hidden role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+  <div class="box">
+    <div class="hd"><h2 id="sheetTitle"></h2><button class="btn" id="sheetClose">とじる</button></div>
+    <div class="bd" id="sheetBody"></div>
+  </div>
+</div>
+<div id="update" class="update" hidden><span>新しい版があります。</span><button id="updateBtn" type="button">開き直す</button></div>
+
+<script src="../js/common.js"></script>
+<script>
+(function(){
+"use strict";
+// ※ 回路の計算・警告・説明文は「電気回路ラボ.html」（検証済み）と同じ。
+//   ちがうのは、回路を「パターンの一覧」から2つ選んでくらべる形にしたことと、小さい回路図のかき方。
+/* ===== 定数 ===== */
+const E=1.5, RL=5, R_IDEAL=1e-4, R_REAL=0.2, R_WIRE=0.001, R_SW=1e-3, BASE=0.3, OVERV=4.5;
+// 図の配置（FULL＝元のアプリと同じ大きな図、MINI＝左右に並べる小さい回路図）
+const GEO={
+  FULL:{XL:40,XR:560,YT:120,YB:290,CX:282,RH_B:48,RH_L:64,CW_B:78,PAD:18,GAP:16,YM:172,YS:244,CWB:92,CWM:100,K:1,H:420},
+  MINI:{XL:30,XR:565,YT:175,YB:455,CX:280,RH_B:92,RH_L:122,CW_B:126,PAD:30,GAP:26,YM:270,YS:372,CWB:150,CWM:160,K:2.2,H:640}
+};
+let XL,XR,YT,YB,CX,RH_B,RH_L,CW_B,PAD,GAP,YM,YS,CWB,CWM,K;
+function useGeo(g){({XL,XR,YT,YB,CX,RH_B,RH_L,CW_B,PAD,GAP,YM,YS,CWB,CWM,K}=g);}
+
+const BATT_OPTS={
+  1:[{id:'1',label:'1個',st:[[[0]]]}],
+  2:[{id:'s2',label:'直列',st:[[[0,1]]]},{id:'p2',label:'並列',st:[[[0],[1]]]}],
+  3:[{id:'s3',label:'直列',st:[[[0,1,2]]]},{id:'p3',label:'並列',st:[[[0],[1],[2]]]},
+     {id:'m3',label:'並列2個＋直列1個',st:[[[0],[1]],[[2]]]},
+     {id:'u3',label:'⚠ 直列2個と1個を並列',st:[[[0,1],[2]]],danger:true}],
+  4:[{id:'s4',label:'直列',st:[[[0,1,2,3]]]},{id:'p4',label:'並列',st:[[[0],[1],[2],[3]]]},
+     {id:'sp4',label:'直列2個の組を2組並列',st:[[[0,1],[2,3]]]},
+     {id:'m4a',label:'並列2個＋直列2個',st:[[[0],[1]],[[2,3]]]},
+     {id:'m4b',label:'並列3個＋直列1個',st:[[[0],[1],[2]],[[3]]]}]
+};
+const BULB_OPTS={
+  1:[{id:'1',label:'1個',st:[[['A']]]}],
+  2:[{id:'s2',label:'直列',st:[[['A','B']]]},{id:'p2',label:'並列',st:[[['A'],['B']]]}],
+  3:[{id:'s3',label:'直列',st:[[['A','B','C']]]},{id:'p3',label:'並列',st:[[['A'],['B'],['C']]]},
+     {id:'m1',label:'A＋（BとCの並列）',st:[[['A']],[['B'],['C']]]},
+     {id:'m2',label:'（AとBの直列）とCの並列',st:[[['A','B'],['C']]]}]
+};
+const MOTOR_OPT={id:'m',label:'モーター1個',st:[[['M']]]};
+const DEF={load:'bulb',bn:1,bid:'1',dirs:[1,1,1,1],ln:1,lid:'1',removed:{},extra:'none',sw:true,range:5};
+function clone(o){return JSON.parse(JSON.stringify(o));}
+function battOpt(s){return BATT_OPTS[s.bn].find(o=>o.id===s.bid)||BATT_OPTS[s.bn][0];}
+function loadOpt(s){return s.load==='motor'?MOTOR_OPT:(BULB_OPTS[s.ln].find(o=>o.id===s.lid)||BULB_OPTS[s.ln][0]);}
+function loadIds(s){return s.load==='motor'?['M']:['A','B','C'].slice(0,s.ln);}
+function activeCells(s){return [0,1,2,3].slice(0,s.bn);}
+function isRemoved(s,id){return s.load!=='motor'&&!!s.removed[id];}
+
+/* ===== 回路のパターン ===== */
+const GROUPS=[
+  {name:'電池のつなぎ方（電球1個）',list:[
+    ['b1','基本：電池1個・電球1個',{}],
+    ['b2s','電池2個を直列',{bn:2,bid:'s2'}],
+    ['b2p','電池2個を並列',{bn:2,bid:'p2'}],
+    ['b3s','電池3個を直列',{bn:3,bid:'s3'}],
+    ['b3p','電池3個を並列',{bn:3,bid:'p3'}],
+    ['b2r','電池2個を直列・1個を逆向き',{bn:2,bid:'s2',dirs:[1,-1,1,1]}]]},
+  {name:'電球のつなぎ方（電池1個）',list:[
+    ['l2s','電球2個を直列',{ln:2,lid:'s2'}],
+    ['l2p','電球2個を並列',{ln:2,lid:'p2'}],
+    ['l3s','電球3個を直列',{ln:3,lid:'s3'}],
+    ['l3p','電球3個を並列',{ln:3,lid:'p3'}],
+    ['lm1','A＋（BとCの並列）',{ln:3,lid:'m1'}],
+    ['lm2','（AとBの直列）とCの並列',{ln:3,lid:'m2'}]]},
+  {name:'電池と電球の組み合わせ',list:[
+    ['c1','電池2個直列・電球2個並列',{bn:2,bid:'s2',ln:2,lid:'p2'}],
+    ['c2','電池2個並列・電球2個直列',{bn:2,bid:'p2',ln:2,lid:'s2'}],
+    ['c3','電池2個直列・電球2個直列',{bn:2,bid:'s2',ln:2,lid:'s2'}]]},
+  {name:'電球をはずす・導線でつなぐ',list:[
+    ['r1','直列の電球Bをはずす',{ln:2,lid:'s2',removed:{B:true}}],
+    ['r2','並列の電球Bをはずす',{ln:2,lid:'p2',removed:{B:true}}],
+    ['r3','A＋（BとCの並列）でBをはずす',{ln:3,lid:'m1',removed:{B:true}}],
+    ['r4','直列の電球Bの両はしを導線でつなぐ',{ln:2,lid:'s2',extra:'B'}]]},
+  {name:'モーター',list:[
+    ['m1','モーター：電池1個',{load:'motor'}],
+    ['m2s','モーター：電池2個を直列',{load:'motor',bn:2,bid:'s2'}],
+    ['m2p','モーター：電池2個を並列',{load:'motor',bn:2,bid:'p2'}],
+    ['mr','モーター：電池の向きを逆に',{load:'motor',dirs:[-1,1,1,1]}]]},
+  {name:'⚠ 危ない例（アプリの中だけで見よう）',danger:true,list:[
+    ['d1','⚠ ショート回路（電池の両はしを導線で）',{extra:'batt'}],
+    ['d2','⚠ 電球の両はしを導線で',{extra:'A'}],
+    ['d3','⚠ 並列の電池を1個逆向き',{bn:2,bid:'p2',dirs:[1,-1,1,1]}],
+    ['d4','⚠ 電圧のちがう電池を並列',{bn:3,bid:'u3'}],
+    ['d5','⚠ 電池4個を直列に電球1個',{bn:4,bid:'s4'}]]}
+];
+const PAT={}; GROUPS.forEach(g=>g.list.forEach(p=>{PAT[p[0]]={id:p[0],name:p[1],s:Object.assign(clone(DEF),clone(p[2])),danger:!!g.danger};}));
+let sel={A:'b1',B:'b2s'};
+
+/* ===== 回路の方程式（元と同じ） ===== */
+function netlist(s){
+  let n=0; const nn=()=>n++;
+  const BN=nn(), BP=nn(), LR=nn(); const el=[];
+  function block(st,a,b,kind){
+    let cur=a;
+    st.forEach((stage,si)=>{
+      const nxt=(si===st.length-1)?b:nn();
+      stage.forEach(br=>{ let c=cur; br.forEach((raw,k)=>{ const d=(k===br.length-1)?nxt:nn();
+        el.push({kind,raw,key:kind==='cell'?'c'+raw:raw,a:c,b:d}); c=d; }); });
+      cur=nxt;
+    });
+  }
+  block(battOpt(s).st,BP,BN,'cell');
+  block(loadOpt(s).st,BP,LR,'load');
+  el.push({kind:'sw',key:'SW',a:LR,b:BN});
+  if(s.extra==='batt') el.push({kind:'wire',key:'WB',a:BP,b:BN});
+  else if(s.extra!=='none'){ const e=el.find(x=>x.kind==='load'&&x.raw===s.extra); if(e) el.push({kind:'wire',key:'W'+s.extra,a:e.a,b:e.b}); }
+  return {n,el,BP,BN,LR};
+}
+function linsolve(A,b){
+  const n=b.length;
+  for(let i=0;i<n;i++){
+    let p=i; for(let r=i+1;r<n;r++) if(Math.abs(A[r][i])>Math.abs(A[p][i])) p=r;
+    [A[i],A[p]]=[A[p],A[i]]; [b[i],b[p]]=[b[p],b[i]];
+    for(let r=i+1;r<n;r++){ const f=A[r][i]/A[i][i]; if(!f) continue; for(let c=i;c<n;c++) A[r][c]-=f*A[i][c]; b[r]-=f*b[i]; }
+  }
+  const x=new Array(n).fill(0);
+  for(let i=n-1;i>=0;i--){ let t=b[i]; for(let c=i+1;c<n;c++) t-=A[i][c]*x[c]; x[i]=t/A[i][i]; }
+  return x;
+}
+function solve(s,nl,r){
+  const N=nl.n, G=[...Array(N)].map(()=>new Array(N).fill(0)), J=new Array(N).fill(0);
+  const add=(a,b,g)=>{G[a][a]+=g;G[b][b]+=g;G[a][b]-=g;G[b][a]-=g;};
+  nl.el.forEach(e=>{
+    if(e.kind==='cell'){ const sg=s.dirs[e.raw]; add(e.a,e.b,1/r); J[e.a]+=sg*E/r; J[e.b]-=sg*E/r; }
+    else if(e.kind==='load'){ if(!isRemoved(s,e.raw)) add(e.a,e.b,1/RL); }
+    else if(e.kind==='wire') add(e.a,e.b,1/R_WIRE);
+    else if(e.kind==='sw'){ if(s.sw) add(e.a,e.b,1/R_SW); }
+  });
+  for(let i=0;i<N;i++) G[i][i]+=1e-9;
+  const sub=G.slice(1).map(row=>row.slice(1)), x=linsolve(sub,J.slice(1));
+  const V=[0,...x], I={}, Vd={};
+  nl.el.forEach(e=>{
+    const d=V[e.a]-V[e.b]; Vd[e.key]=d;
+    if(e.kind==='cell') I[e.key]=d/r - s.dirs[e.raw]*E/r;
+    else if(e.kind==='load') I[e.key]=isRemoved(s,e.raw)?0:d/RL;
+    else if(e.kind==='wire') I[e.key]=d/R_WIRE;
+    else I[e.key]=s.sw?d/R_SW:0;
+  });
+  return {V,I,Vd,Vbat:V[nl.BP]-V[nl.BN]};
+}
+function evaluate(s){
+  const nl=netlist(s), ideal=solve(s,nl,R_IDEAL), real=solve(s,nl,R_REAL);
+  const cells=activeCells(s);
+  const maxReal=Math.max(...cells.map(i=>Math.abs(real.I['c'+i])));
+  const danger=maxReal>2;
+  const R=danger?real:ideal;
+  R.nl=nl; R.danger=danger; R.maxReal=maxReal;
+  const wk=s.extra==='batt'?'WB':(s.extra!=='none'?'W'+s.extra:null);
+  R.dangerType=danger?((wk&&Math.abs(real.I[wk]||0)>2)?'short':'loop'):null;
+  R.Imain=R.I.SW||0;
+  R.maxCell=Math.max(...cells.map(i=>Math.abs(R.I['c'+i])));
+  const dirs=cells.map(i=>s.dirs[i]);
+  R.mixedDir=dirs.some(d=>d<0)&&dirs.some(d=>d>0);
+  R.allRev=dirs.every(d=>d<0);
+  R.over=loadIds(s).filter(id=>!isRemoved(s,id)&&Math.abs(R.Vd[id])>=OVERV-1e-6);
+  R.overRange=Math.abs(R.Imain)>s.range+1e-9;
+  return R;
+}
+
+/* ===== 図の配置（元と同じ。大きさだけ GEO で切りかえ） ===== */
+function placeBlock(st,cw,rh,yc,keyf){
+  const ss=st.map(stage=>{const ml=Math.max(...stage.map(b=>b.length)),m=stage.length>1;return{stage,ml,m,w:ml*cw+(m?2*PAD:0)};});
+  const Wd=ss.reduce((a,x)=>a+x.w,0)+GAP*(ss.length-1);
+  let x=CX-Wd/2; const x0=x, items=[], segs=[]; let rows=1;
+  ss.forEach((sg,si)=>{
+    rows=Math.max(rows,sg.stage.length);
+    const brs=sg.stage.map((br,k)=>{
+      const y=sg.m?yc+(k-(sg.stage.length-1)/2)*rh:yc, k0=keyf(br[0]), raw0=br[0];
+      return {br,y,f:R=>(R.I[k0]||0)+(R.I['W'+raw0]||0)};
+    });
+    const xs=x, xe=x+sg.w;
+    brs.forEach(b=>{
+      const start=xs+(sg.m?PAD:0)+(sg.ml-b.br.length)*cw/2, end=start+b.br.length*cw;
+      if(start>xs+0.5) segs.push({pts:[[xs,b.y],[start,b.y]],f:b.f});
+      b.br.forEach((raw,i)=>{ const cx=start+(i+0.5)*cw, key=keyf(raw);
+        items.push({key,raw,cx,y:b.y,cw});
+        segs.push({pts:[[cx-cw/2,b.y],[cx+cw/2,b.y]],f:R=>R.I[key]||0}); });
+      if(end<xe-0.5) segs.push({pts:[[end,b.y],[xe,b.y]],f:b.f});
+    });
+    if(sg.m){
+      const up=brs.filter(b=>b.y<yc-0.1).sort((a,b)=>b.y-a.y), dn=brs.filter(b=>b.y>yc+0.1).sort((a,b)=>a.y-b.y);
+      [up,dn].forEach(list=>{ let prev=yc; list.forEach((b,j)=>{ const outer=list.slice(j), f=R=>outer.reduce((a,o)=>a+o.f(R),0);
+        segs.push({pts:[[xs,prev],[xs,b.y]],f}); segs.push({pts:[[xe,b.y],[xe,prev]],f}); prev=b.y; }); });
+    }
+    const stF=R=>brs.reduce((a,b)=>a+b.f(R),0);
+    x=xe;
+    if(si<ss.length-1){ segs.push({pts:[[x,yc],[x+GAP,yc]],f:stF}); x+=GAP; }
+  });
+  return {x0,x1:x,items,segs,rows};
+}
+function layout(s){
+  const lo=loadOpt(s), bo=battOpt(s);
+  const cwL=s.load==='motor'?CWM:CWB;
+  const top=placeBlock(lo.st,cwL,RH_L,YT,r=>r), bot=placeBlock(bo.st,CW_B,RH_B,YB,r=>'c'+r);
+  const IM=R=>R.I.SW||0, ISH=R=>R.I.WB||0, IB=R=>IM(R)+ISH(R);
+  const aL=bot.x0-14*K, aR=bot.x1+14*K;
+  const segs=[
+    {pts:[[XL,YT],[top.x0,YT]],f:IM},{pts:[[top.x1,YT],[XR,YT]],f:IM},{pts:[[XR,YT],[XR,YB]],f:IM},
+    {pts:[[XR,YB],[aR,YB]],f:IM},{pts:[[aR,YB],[bot.x1,YB]],f:IB},{pts:[[bot.x0,YB],[aL,YB]],f:IB},
+    {pts:[[aL,YB],[XL,YB]],f:IM},{pts:[[XL,YB],[XL,YT]],f:IM}
+  ].concat(top.segs,bot.segs);
+  let shortY=null;
+  if(s.extra==='batt'){ shortY=YB+(bot.rows-1)/2*RH_B+34*K; segs.push({pts:[[aL,YB],[aL,shortY],[aR,shortY],[aR,YB]],f:ISH,extra:true}); }
+  else if(s.extra!=='none'){
+    const it=top.items.find(i=>i.raw===s.extra);
+    if(it){ const h=(s.load==='motor'?62:48)*K, xa=it.cx-it.cw/2+6, xb=it.cx+it.cw/2-6;
+      segs.push({pts:[[xa,it.y],[xa,it.y-h],[xb,it.y-h],[xb,it.y]],f:R=>R.I['W'+s.extra]||0,extra:true}); }
+  }
+  return {top,bot,segs,aL,aR,shortY};
+}
+
+/* ===== 描画 ===== */
+const ptsD=p=>'M'+p.map(q=>q[0].toFixed(1)+' '+q[1].toFixed(1)).join(' L');
+function level(I){const a=Math.abs(I)/BASE; return a<0.02?0:Math.min(1,0.22+0.4*a);}
+function needleAngle(I,range){return Math.max(-1.15,Math.min(1.15,I/range))*60;}
+// 記号を中心 (x,y) のまわりに K 倍する（小さい図で記号を見やすくする）
+const sc=(x,y)=>K===1?'':` transform="translate(${x} ${y}) scale(${K}) translate(${-x} ${-y})"`;
+function heatAt(x,y){return `<g${sc(x,y)}><g class="heat" stroke="var(--danger)" stroke-width="2.5" fill="none" stroke-linecap="round">`+
+  [-12,0,12].map(dx=>`<path d="M${x+dx} ${y} q4 -5 0 -10 q-4 -5 0 -10"/>`).join('')+`</g></g>`;}
+
+let gid=0;
+function drawSVG(view,s,L,R){
+  const real=view==='real', mini=K>1, out=[], G='g'+(gid++);
+  const bgv=real?'var(--surface2)':'var(--surface)';
+  out.push(`<defs><radialGradient id="glow-${G}"><stop offset="0" stop-color="#ffe27a" stop-opacity="1"/><stop offset="1" stop-color="#ffc62e" stop-opacity="0"/></radialGradient></defs>`);
+  const wst=real?`stroke="var(--wire)" stroke-width="5"`:`stroke="var(--sch)" stroke-width="${(2.2*(mini?2.3:1)).toFixed(1)}"`;
+  L.segs.forEach(sg=>{ const hot=sg.extra&&R.danger&&R.dangerType==='short';
+    out.push(`<path d="${ptsD(sg.pts)}" fill="none" ${wst} stroke-linecap="round" stroke-linejoin="round"${hot?' style="stroke:var(--danger)"':''}/>`); });
+  const dw=mini?14:(real?7:6), gap=22*(mini?2.2:1);
+  L.segs.forEach((sg,i)=>{ out.push(`<path class="dot" data-i="${i}" d="${ptsD(sg.pts)}" fill="none" stroke="var(--accent)" stroke-width="${dw}" stroke-linecap="round" stroke-dasharray="0.01 ${gap}"/>`); });
+  // 電池
+  L.bot.items.forEach(it=>{
+    const idx=it.raw, sg=s.dirs[idx], I=R.I[it.key], hot=R.danger&&Math.abs(I)>2;
+    const plusLeft=sg>0, cx=it.cx, y=it.y;
+    let g=`<g${sc(cx,y)}>`;
+    if(real){
+      const w=58,h=24, xl=cx-w/2;
+      g+=`<rect x="${plusLeft?xl-6:xl+w}" y="${y-5}" width="6" height="10" rx="2" fill="#c9a45e"/>`;
+      g+=`<rect x="${xl}" y="${y-h/2}" width="${w}" height="${h}" rx="6" fill="#39445c" stroke="#1d2436"/>`;
+      g+=`<rect x="${plusLeft?xl+6:xl+w-18}" y="${y-h/2}" width="12" height="${h}" fill="#d98a06"/>`;
+      g+=`<text x="${plusLeft?xl+12:xl+w-12}" y="${y+5}" text-anchor="middle" font-size="15" font-weight="700" fill="#1b1300">+</text>`;
+      g+=`<text x="${plusLeft?xl+w-9:xl+9}" y="${y+5}" text-anchor="middle" font-size="15" font-weight="700" fill="#fff">−</text>`;
+      g+=`<text x="${cx+(plusLeft?4:-4)}" y="${y+5}" text-anchor="middle" font-size="13" fill="#fff">${idx+1}</text>`;
+    }else{
+      const xp=cx+(plusLeft?-5:5), xm=cx+(plusLeft?5:-5);
+      g+=`<rect x="${cx-9}" y="${y-19}" width="18" height="38" fill="${bgv}"/>`;
+      g+=`<line x1="${xp}" y1="${y-16}" x2="${xp}" y2="${y+16}" stroke="var(--sch)" stroke-width="2.2"/>`;
+      g+=`<line x1="${xm}" y1="${y-8}" x2="${xm}" y2="${y+8}" stroke="var(--sch)" stroke-width="5"/>`;
+      g+=`<text x="${xp+(plusLeft?-7:7)}" y="${y-8}" text-anchor="middle" font-size="12" fill="var(--muted)">+</text>`;
+    }
+    g+='</g>';
+    out.push(g);
+    if(hot) out.push(heatAt(cx,y-18*K));
+  });
+  // 電球・モーター
+  L.top.items.forEach(it=>{
+    const id=it.raw, cx=it.cx, y=it.y;
+    if(id==='M'){
+      const vd=R.Vd.M||0;
+      if(real){
+        out.push(`<rect x="${cx-19}" y="${y-13}" width="38" height="26" rx="6" fill="#b9c1d0" stroke="#6b7489"/>`+
+          `<rect x="${cx-3}" y="${y-34}" width="6" height="21" fill="#8a93a6"/>`+
+          `<g class="prop" data-cx="${cx}" data-cy="${y-38}"><ellipse cx="${cx-18}" cy="${y-38}" rx="18" ry="5" fill="#2e9a5f"/><ellipse cx="${cx+18}" cy="${y-38}" rx="18" ry="5" fill="#2e9a5f"/><circle cx="${cx}" cy="${y-38}" r="4" fill="#555"/></g>`+
+          `<text x="${cx}" y="${y+32}" text-anchor="middle" font-size="18" fill="var(--muted)">モーター</text>`);
+      }else{
+        out.push(`<g${sc(cx,y)}><circle cx="${cx}" cy="${y}" r="16" fill="${bgv}" stroke="var(--sch)" stroke-width="2.2"/><text x="${cx}" y="${y+6}" text-anchor="middle" font-size="17" font-weight="700" fill="var(--sch)">M</text></g>`);
+      }
+      if(Math.abs(vd)>=OVERV-1e-6) out.push(heatAt(cx+26*K,y-12*K));
+      return;
+    }
+    const rem=isRemoved(s,id), lv=rem?0:level(R.I[id]||0), over=R.over.includes(id);
+    let g=`<g${sc(cx,y)}>`;
+    if(real){
+      const gy=y-21;
+      g+=`<rect x="${cx-13}" y="${y-8}" width="26" height="16" rx="3" fill="#9aa3b5" stroke="#6b7489"/>`;
+      if(!rem){
+        if(lv>0) g+=`<circle cx="${cx}" cy="${gy}" r="${14+20*lv}" fill="url(#glow-${G})" opacity="${lv}"/>`;
+        g+=`<circle cx="${cx}" cy="${gy}" r="13" fill="${lv>0?`rgba(255,214,90,${(0.3+0.7*lv).toFixed(2)})`:'rgba(255,255,255,.55)'}" stroke="#8d97ab" stroke-width="1.5"/>`;
+        g+=`<path d="M${cx-4} ${gy+6} L${cx-4} ${gy} Q${cx} ${gy-6} ${cx+4} ${gy} L${cx+4} ${gy+6}" fill="none" stroke="${lv>0?'#b35a00':'#8d97ab'}" stroke-width="1.5"/>`;
+      }else{
+        g+=`<circle cx="${cx+20}" cy="${gy-10}" r="12" fill="none" stroke="var(--muted)" stroke-dasharray="3 3"/>`;
+        g+=`<text x="${cx}" y="${y+26}" text-anchor="middle" font-size="15" fill="var(--muted)">はずした</text>`;
+      }
+      g+=`<text x="${cx-19}" y="${gy+7}" text-anchor="end" font-size="21" font-weight="700" fill="var(--ink)">${id}</text>`;
+    }else{
+      if(!rem){
+        g+=`<circle cx="${cx}" cy="${y}" r="13" fill="${bgv}" stroke="var(--sch)" stroke-width="2.2"/>`;
+        if(lv>0) g+=`<circle cx="${cx}" cy="${y}" r="12" fill="#ffc62e" opacity="${(0.25+0.75*lv).toFixed(2)}"/>`;
+        g+=`<path d="M${cx-9} ${y-9} L${cx+9} ${y+9} M${cx+9} ${y-9} L${cx-9} ${y+9}" stroke="var(--sch)" stroke-width="2"/>`;
+      }else{
+        g+=`<rect x="${cx-16}" y="${y-16}" width="32" height="32" fill="${bgv}"/>`;
+        g+=`<circle cx="${cx}" cy="${y}" r="13" fill="none" stroke="var(--muted)" stroke-dasharray="3 3"/>`;
+        g+=`<text x="${cx}" y="${y+30}" text-anchor="middle" font-size="${mini?13:15}" fill="var(--muted)">はずした</text>`;
+      }
+      g+=`<text x="${cx-18}" y="${y-12}" text-anchor="end" font-size="21" font-weight="700" fill="var(--ink)">${id}</text>`;
+    }
+    g+='</g>';
+    out.push(g);
+    if(over) out.push(heatAt(cx+24*K,y-26*K));
+  });
+  // 検流計
+  const ang=needleAngle(R.Imain,s.range), peg=Math.abs(R.Imain)>s.range+1e-9;
+  if(real){
+    out.push(`<rect x="${XR-30}" y="${YM-24}" width="60" height="48" rx="6" fill="#eef1f6" stroke="#6b7489"/>`+
+      `<path d="M${XR-17} ${YM+4} A20 20 0 0 1 ${XR+17} ${YM+4}" fill="none" stroke="#8d97ab" stroke-width="1.5"/>`+
+      `<g><line x1="${XR}" y1="${YM+14}" x2="${XR}" y2="${YM-10}" stroke="${peg?'#c0266d':'#1b2335'}" stroke-width="2" transform="rotate(${ang.toFixed(1)} ${XR} ${YM+14})"/></g>`+
+      `<circle cx="${XR}" cy="${YM+14}" r="3" fill="#1b2335"/>`);
+  }else{
+    out.push(`<g${sc(XR,YM)}><circle cx="${XR}" cy="${YM}" r="16" fill="${bgv}" stroke="var(--sch)" stroke-width="2.2"/><text x="${XR}" y="${YM+6}" text-anchor="middle" font-size="16" font-weight="700" fill="var(--sch)">A</text></g>`);
+  }
+  if(!mini) out.push(`<text x="${XR-(real?36:22)}" y="${YM+5}" text-anchor="end" font-size="19" fill="var(--muted)">検流計</text>`);
+  // スイッチ（パターンでは、いつも入）
+  const bx=s.sw?XR:XR+19, by=s.sw?YS-16:YS-8;
+  let g=`<g${sc(XR,YS)}>`;
+  if(real){
+    g+=`<rect x="${XR-14}" y="${YS-27}" width="28" height="54" rx="4" fill="#cdb48a" stroke="#9c8660"/>`+
+       `<circle cx="${XR}" cy="${YS-16}" r="4" fill="#8a93a6"/><circle cx="${XR}" cy="${YS+16}" r="4" fill="#8a93a6"/>`+
+       `<line x1="${XR}" y1="${YS+16}" x2="${bx}" y2="${by}" stroke="#6b7489" stroke-width="5" stroke-linecap="round"/><circle cx="${bx}" cy="${by}" r="4.5" fill="#39445c"/>`;
+  }else{
+    g+=`<rect x="${XR-8}" y="${YS-19}" width="30" height="38" fill="${bgv}"/>`+
+       `<circle cx="${XR}" cy="${YS-16}" r="3" fill="${bgv}" stroke="var(--sch)" stroke-width="2"/><circle cx="${XR}" cy="${YS+16}" r="3" fill="${bgv}" stroke="var(--sch)" stroke-width="2"/>`+
+       `<line x1="${XR}" y1="${YS+13}" x2="${s.sw?XR:XR+17}" y2="${s.sw?YS-13:YS-6}" stroke="var(--sch)" stroke-width="2.2"/>`;
+  }
+  g+='</g>';
+  if(!mini) g+=`<text x="${XR-(real?20:14)}" y="${YS+5}" text-anchor="end" font-size="19" fill="var(--muted)">スイッチ ${s.sw?'入':'切'}</text>`;
+  out.push(g);
+  if(R.danger){
+    if(L.shortY!=null) out.push(heatAt((L.aL+L.aR)/2,L.shortY-4*K));
+    out.push(`<text x="${XL+8}" y="${YB+(L.bot.rows-1)/2*RH_B+28*K}" font-size="${19*(mini?2:1)}" font-weight="700" fill="var(--danger)">⚠ あつい！</text>`);
+  }
+  return out.join('');
+}
+
+/* ===== 数値の表し方（元と同じ） ===== */
+function fmtRatio(r){
+  r=Math.abs(r); if(r<0.005) return '0';
+  const ni=Math.round(r); if(ni>=1&&Math.abs(r-ni)<0.003) return String(ni);
+  if(r<1){ for(let d=2;d<=6;d++){ const n=Math.round(r*d); if(n>0&&Math.abs(r*d-n)<0.003) return n+'/'+d; } return r.toFixed(2); }
+  const n=Math.round(r); if(Math.abs(r-n)<0.003) return String(n); return r.toFixed(1);
+}
+function fmtA(I){I=Math.abs(I); if(I<0.005) return '0 A'; return (I<1?I.toFixed(2):I.toFixed(1))+' A';}
+function fmtV(v){v=Math.abs(v); return (v<0.005?'0':(v<1?v.toFixed(2):v.toFixed(1)))+' V';}
+
+/* ===== 警告と説明（元と同じ。検流計の目もりの警告はパターンにないので出ない） ===== */
+function alerts(s,R){
+  const a=[], thing=s.load==='motor'?'モーター':'電球';
+  if(R.danger&&R.dangerType==='short'){
+    const k=Math.round(R.maxReal/BASE);
+    a.push({big:true,t:'⚠ ショート回路',b:`電流が${thing}を通らずに、導線だけを通って流れています。電流は目安で約${R.maxReal.toFixed(1)} A、ふつう（0.3 A）の約${k}倍です（電池によってちがい、十数倍から数十倍になります）。電池や導線がとても熱くなり、やけどや火事の危険があります。<b>実験では絶対にしないこと。</b>`});
+  }else if(R.danger){
+    const why=battOpt(s).id==='u3'?'電圧のちがう電池の組を並列にしている':'並列の電池の1個が逆向きになっている';
+    a.push({big:true,t:'⚠ 電池どうしで大きな電流',b:`${why}ため、電池どうしの間に大きな電流（目安で約${R.maxReal.toFixed(1)} A）が流れています。${thing}を通らないので、<b>スイッチを切っても止まりません。</b>電池が熱くなり、液もれや破裂の危険があります。実験では絶対にしないこと。`});
+  }
+  R.over.forEach(id=>{
+    const v=Math.abs(R.Vd[id]);
+    if(id==='M') a.push({t:'⚠ モーターに4.5 V以上',b:`モーターに${v.toFixed(1)} Vかかっています。このモーターは1.5〜3 V用なので、速く回りますが、熱くなっていたむおそれがあります。`});
+    else a.push({t:`⚠ 電球${id}に4.5 V以上`,b:`電球${id}に${v.toFixed(1)} Vかかっています。この豆電球は2.5 V用なので、とても明るく光りますが、フィラメントが切れるおそれがあります。`});
+  });
+  if(!R.danger&&R.mixedDir){
+    const rv=activeCells(s).filter(i=>s.dirs[i]<0).map(i=>i+1).join('・');
+    a.push({t:'⚠ 逆向きの電池',b:`電池${rv}が逆向きです。逆向きの電池には無理に電流が流れて、電池をいためることがあります。実際にはやめましょう。`});
+  }
+  return a;
+}
+function explain(s,R){
+  const out=[], bo=battOpt(s), lo=loadOpt(s), n=s.bn, thing=s.load==='motor'?'モーター':'電球';
+  const k=Math.round(Math.abs(R.Vbat)/E);
+  if(R.danger){
+    if(R.dangerType==='short') out.push('導線は電流をとても通しやすいので、電球やモーターを通らない道があると、電流はほとんどそちらを流れます。通りにくいものがない回路では、電流がとても大きくなります。');
+    else out.push('並列につないだ電池の電圧がそろっていないと、電圧の高いほうから低いほうへ、電池の中を通って電流が流れます。この道には電流を通りにくくするものがないので、電流がとても大きくなります。');
+    return out;
+  }
+  if(!s.sw) out.push('スイッチが切れていて、電気の通り道が1つの輪になっていないので、電流は流れません。');
+  if(R.mixedDir){
+    out.push(`逆向きの電池は、ほかの電池のはたらきを打ち消します。いまは全体で電池${k}個分のはたらきです。`+(k===0?'電流は流れません。':''));
+  }else{
+    if(R.allRev) out.push(`電池の向きを逆にすると、電流の向きが逆になります。検流計の針は反対にふれ${s.load==='motor'?'、モーターは逆向きに回ります。':'ますが、電球の明るさは変わりません。'}`);
+    if(n===1){ if(!R.allRev&&(s.load==='motor'||s.ln===1)) out.push(`電池1個・${thing}1個のときの電流（0.3 A）を「1」として、ほかの回路とくらべます。`); }
+    else if(bo.id==='s'+n) out.push(`電池を${n}個直列につなぐと、電流をおし出すはたらき（電圧）が${n}倍になり、流れる電流も大きくなります。そのかわり電池は早くへります。`);
+    else if(bo.id==='p'+n) out.push(`電池を並列につなぐと、電流をおし出すはたらき（電圧）は電池1個と同じです。流れる電流を${n}個で分け合うので、電池1個あたりの電流が少なくなり、長持ちします。`);
+    else if(bo.id==='sp4') out.push('直列2個の組が2つ並列になっています。1組が電池2個分のはたらきで、並列にしても2個分のままです。電流を2組で分け合うので、電池は長持ちします。');
+    else out.push(`並列になっている電池は、まとめて電池1個分と考えます。直列の部分は足し算なので、全体で電池${k}個分のはたらきです。並列の電池は電流を分け合います。`);
+  }
+  if(s.load==='motor'){ out.push('モーターは、流れる電流が大きいほど速く回り、電流の向きが逆になると逆向きに回ります。'); return out; }
+  const ids=loadIds(s), rm=ids.filter(id=>s.removed[id]), by=(s.extra!=='none'&&s.extra!=='batt')?s.extra:null, m=s.ln;
+  if(!rm.length&&!by){
+    if(lo.id==='s'+m&&m>1) out.push(`電球を${m}個直列につなぐと、電流の通りにくさ（<ruby>抵抗<rt>ていこう</rt></ruby>）が${m}倍になるので、電流は電球1個のときの1/${m}になります。どの電球にも同じ大きさの電流が流れるので、明るさは同じです。`);
+    else if(lo.id==='p'+m&&m>1) out.push(`電球を並列につなぐと、どの電球にも電池の電圧がそのままかかるので、1個1個は電球1個のときと同じ明るさです。全体の電流は${m}倍になるので、電池は早くへります。`);
+    else if(lo.id==='m1') out.push('BとCは並列なので、2個合わせて電球1/2個分の通りにくさです。Aと合わせて全体は電球1.5個分なので、全体の電流は電球1個のときの2/3になります。Aには全部の電流が、BとCにはその半分ずつが流れるので、Aがいちばん明るくなります。');
+    else if(lo.id==='m2') out.push('Cには電池の電圧がそのままかかるので、電球1個のときと同じ明るさです。AとBは直列なので、電流はCの半分になり、AとBは暗くなります。');
+  }
+  if(rm.length){
+    const nm=rm.join('・');
+    if(lo.id.startsWith('s')&&m>1) out.push(`直列つなぎでは電流の通り道が1本だけなので、電球${nm}をはずすと道が切れて、全部の電球が消えます。`);
+    else if(lo.id.startsWith('p')) out.push(`並列つなぎでは通り道が分かれているので、電球${nm}をはずしても、ほかの電球の道は切れません。明るさも変わりません。`);
+    else if(lo.id==='m1'){ if(rm.includes('A')) out.push('Aを通らないと、どの電球にも行けないので、全部の電球が消えます。');
+      else if(rm.length===1) out.push(`電球${nm}をはずすと、残りの電球は直列つなぎと同じになります。全体の電流が小さくなるのでAは暗くなり、残ったもう1個には全部の電流が流れるので明るくなります。`);
+      else out.push('BもCもはずすと、Aから先の道がなくなるので、電流は流れません。'); }
+    else if(lo.id==='m2'){ if(rm.includes('A')||rm.includes('B')) out.push('AとBの道が切れるので、AとBは消えます。Cには電池の電圧がそのままかかるので、明るさは変わりません。');
+      if(rm.includes('C')) out.push('Cの道が切れても、AとBの道は切れないので、AとBの明るさは変わりません。'); }
+    else if(m===1) out.push('電球をはずすと道が切れるので、電流は流れません。');
+  }
+  if(by) out.push(`電球${by}の両はしを導線でつなぐと、電流は通りやすい導線のほうを流れ、電球${by}にはほとんど流れません（消えます）。そのぶん回路全体の通りにくさが小さくなり、ほかの電球を流れる電流が変わります。`);
+  return out;
+}
+
+/* ===== ことば ===== */
+const TERMS={
+  current:{t:'<ruby>電流<rt>でんりゅう</rt></ruby>',u:'単位：A（アンペア）',h:`<p>回路の中を流れる電気の流れです。電池の＋極から出て、導線・電球などを通り、−極へもどる向きに流れると決めています。</p>
+    <ul><li>電流が大きいほど、豆電球は明るく光り、モーターは速く回ります。</li><li>検流計（電流計）ではかります。電流の向きが逆になると、針は反対にふれます。</li><li>このアプリでは、黄色の点の動きが電流の流れです。点が速いほど電流が大きいことを表します。</li></ul>`},
+  volt:{t:'<ruby>電圧<rt>でんあつ</rt></ruby>',u:'単位：V（ボルト）',h:`<p>電流を流そうとする「おし出すはたらき」の大きさです。かん電池1個の電圧は1.5 Vです。</p>
+    <ul><li>電池を<b>直列</b>につなぐと、電圧は足し算になります（2個で3 V、3個で4.5 V）。</li><li>電池を<b>並列</b>につなぐと、電圧は電池1個分のままです。そのかわり、電池が長持ちします。</li><li>小学校では「電池のはたらき」とよぶことが多く、「電圧」という言葉は中学校（中2）で習います。</li></ul>`},
+  resist:{t:'<ruby>抵抗<rt>ていこう</rt></ruby>（電流の通りにくさ）',u:'単位：Ω（オーム）',h:`<p>電流の流れにくさです。豆電球やモーターには抵抗があり、導線にはほとんどありません。</p>
+    <ul><li>同じ電圧なら、抵抗が大きいほど電流は小さくなります。</li><li>電球を直列につなぐと、抵抗は足し算になって大きくなります。並列につなぐと、道が増えるので全体の抵抗は小さくなります。</li><li>中学校で習う言葉です。</li></ul>`},
+  series:{t:'<ruby>直列<rt>ちょくれつ</rt></ruby>つなぎと<ruby>並列<rt>へいれつ</rt></ruby>つなぎ',u:'',h:`<ul><li><b>直列</b>：1本の道に、順番につなぐ。電流の通り道は1本だけなので、1か所切れると全部止まります。</li><li><b>並列</b>：道を枝分かれさせて、横に並べてつなぐ。通り道が分かれているので、1つはずしても、ほかの道には電流が流れます。</li></ul>`},
+  short:{t:'ショート回路',u:'',h:`<p>電池の＋極と−極が、電球やモーターを通らずに導線だけでつながった回路です。通りにくいものがないので、とても大きな電流が流れ、電池や導線が熱くなります。やけどや火事の危険があるので、<b>絶対にしてはいけません。</b></p>`},
+  base:{t:'「何倍」の見方',u:'',h:`<p>このアプリでは、<b>電池1個・豆電球1個</b>の回路を「1」として、ほかの回路の電圧・電流・明るさが何倍かを表しています。入試の問題でも、この考え方でくらべます。</p><p>計算では、電池1個を1.5 V、豆電球1個の抵抗を5 Ωとしています（電池1個・電球1個で0.3 A）。</p>`}
+};
+function waterSVG(){
+  // 電池＝ポンプ、電圧＝水をおし上げる高さ、電流＝水の流れ、電球＝水車
+  return `<svg class="water" viewBox="0 0 340 170" role="img" aria-label="水の流れのたとえの図">
+  <path d="M60 40 H280 V140 H60 Z" fill="none" stroke="#2f7fd6" stroke-width="10" stroke-linejoin="round" opacity=".35"/>
+  <g fill="#2f7fd6">${[[110,40],[170,40],[230,40],[280,90],[230,140],[170,140],[110,140]].map(p=>`<circle cx="${p[0]}" cy="${p[1]}" r="4"/>`).join('')}</g>
+  <path d="M150 34 l12 6 -12 6z M290 84 l-6 12 -6-12z M190 134 l-12 6 12 6z" fill="#2f7fd6"/>
+  <rect x="40" y="70" width="40" height="44" rx="6" fill="#d98a06"/><text x="60" y="97" text-anchor="middle" font-size="13" font-weight="700" fill="#1b1400">ポンプ</text>
+  <circle cx="280" cy="90" r="18" fill="#fff" stroke="#586379" stroke-width="2"/><path d="M280 72v36M262 90h36M267 77l26 26M293 77l-26 26" stroke="#586379" stroke-width="2"/>
+  <text x="60" y="132" text-anchor="middle" font-size="12" fill="currentColor">＝電池</text>
+  <text x="305" y="124" text-anchor="middle" font-size="12" fill="currentColor">水車＝電球</text>
+  <text x="170" y="28" text-anchor="middle" font-size="12" fill="currentColor">水の流れ＝電流</text>
+  <text x="170" y="164" text-anchor="middle" font-size="12" fill="currentColor">ポンプのおす強さ＝電圧</text></svg>`;
+}
+function renderWords(){
+  const k=['current','volt','resist','series','short'];
+  document.getElementById('words').innerHTML=
+    `<section class="panel term"><h3>水の流れでたとえると</h3>${waterSVG()}<p class="hint">電池は水をおし出すポンプ、電流は水の流れ、電球は水の流れで回る水車のようなものです。ポンプを強くする（電圧を大きくする）と、水がたくさん流れ（電流が大きくなり）、水車は速く回ります（電球が明るくなります）。たとえなので、本物の電気とぴったり同じではありません。</p></section>`+
+    k.map(id=>`<section class="panel term"><h3>${TERMS[id].t}${TERMS[id].u?`<small>${TERMS[id].u}</small>`:''}</h3>${TERMS[id].h}</section>`).join('');
+}
+
+/* ===== 画面 ===== */
+const $=id=>document.getElementById(id);
+const figs={};   // svg要素 → アニメーション情報
+function renderFig(svg,s,view,geo){
+  useGeo(geo);
+  const R=evaluate(s), L=layout(s);
+  svg.setAttribute('viewBox',`0 0 600 ${geo.H}`);
+  svg.innerHTML=drawSVG(view,s,L,R);
+  const kk=geo.K;
+  figs[svg.id]={svg,K:kk,segs:L.segs.map(sg=>{const I=sg.f(R),a=Math.abs(I);return a<1e-4?0:Math.sign(I)*Math.min(600,70*a/BASE)*kk;}),
+    off:L.segs.map(()=>0),dots:[...svg.querySelectorAll('path.dot')],props:[...svg.querySelectorAll('.prop')],omega:s.load==='motor'?360*(R.Vd.M||0)/E:0,ang:0};
+  figs[svg.id].dots.forEach(p=>{ if(figs[svg.id].segs[+p.dataset.i]===0) p.style.opacity='0'; });
+  return R;
+}
+function cells(s,R){
+  // 表の1列分
+  const ids=loadIds(s);
+  if(R.danger) return {v:`<span class="dz">⚠ 危険</span><div class="s">大きな電流で電圧が下がる</div>`,
+    i:`<span class="dz">約${Math.round(R.maxReal/BASE)}倍</span><div class="s">${fmtA(R.maxReal)}（目安）</div>`,
+    l:ids.map(id=>`<div>${id==='M'?'モーター':'電球'+id}：—</div>`).join(''),
+    life:`<span class="dz">すぐなくなる</span><div class="s">電池が熱くなる</div>`};
+  const lds=ids.map(id=>{
+    const I=R.I[id]||0, V=R.Vd[id]||0, rem=isRemoved(s,id);
+    if(id==='M'){const r=Math.abs(V)/E;return `<div>速さ <b>${r<0.0005?'止まる':fmtRatio(r)+'倍'}</b>${V<-1e-4?'（逆回り）':''}</div>`;}
+    return `<div>${id}：<b>${rem?'はずした':fmtRatio(Math.abs(I)/BASE)+'倍'}</b></div>`;
+  }).join('');
+  let life;
+  if(R.maxCell<1e-4) life=`<span class="v">へらない</span><div class="s">電流が流れていない</div>`;
+  else life=`<span class="v">${fmtRatio(BASE/R.maxCell)}倍</span><div class="s">電池1個あたり ${fmtA(R.maxCell)}</div>`;
+  return {v:`<span class="v">${fmtRatio(R.Vbat/E)}倍</span><div class="s">${fmtV(R.Vbat)}${R.Vbat<-1e-4?'（向きが逆）':''}</div>`,
+    i:`<span class="v">${fmtRatio(R.Imain/BASE)}倍</span><div class="s">${fmtA(R.Imain)}${R.Imain<-1e-4?'（逆向き）':''}</div>`,
+    l:lds, life};
+}
+function fmtCmp(r){
+  // くらべる文用：整数・かんたんな分数はそのまま、それ以外は「約」をつける
+  const n=Math.round(r); if(Math.abs(r-n)<0.003) return n+'倍';
+  for(let d=2;d<=8;d++){ const k=Math.round(r*d); if(Math.abs(r*d-k)<0.003&&(r<1||d===2)) return (d===2&&r>1?(r).toFixed(1):k+'/'+d)+'倍'; }
+  return '約'+(r<1?r.toFixed(2):r.toFixed(1))+'倍';
+}
+function sentence(Ra,Rb,a,b){
+  if(Ra.danger||Rb.danger) return `<b>⚠ 危ない回路があります。</b>「なぜ？」で理由を読もう。`;
+  const ia=Math.abs(Ra.Imain), ib=Math.abs(Rb.Imain);
+  let t='回路を流れる電流：';
+  if(ia<1e-4&&ib<1e-4) t+='どちらも流れません。';
+  else if(ia<1e-4) t+=`<span class="ta">A</span>は流れません。`;
+  else if(ib<1e-4) t+=`<span class="tb">B</span>は流れません。`;
+  else{ const r=ib/ia; t+=Math.abs(r-1)<0.003?'<span class="ta">A</span>と<span class="tb">B</span>は同じです。':`<span class="tb">B</span>は<span class="ta">A</span>の <b>${fmtCmp(r)}</b> です。`; }
+  const la=Math.abs(Ra.maxCell), lb=Math.abs(Rb.maxCell);
+  if(la>1e-4&&lb>1e-4){ const r=la/lb; t+=`<br>電池の長持ち：`+(Math.abs(r-1)<0.003?'同じです。':`<span class="tb">B</span>は<span class="ta">A</span>の <b>${fmtCmp(r)}</b> です。`); }
+  return t;
+}
+function whyBox(who,p,R){
+  const al=alerts(p.s,R);
+  return `<div class="who ${who.toLowerCase()}">${who}：${p.name}</div>`+
+    al.map(a=>`<div class="alert" role="alert"><div class="t">${a.t}</div><div>${a.b}</div></div>`).join('')+
+    `<div class="why">${explain(p.s,R).map(t=>`<p>${t}</p>`).join('')||'<p>—</p>'}</div>`;
+}
+function render(){
+  const pa=PAT[sel.A], pb=PAT[sel.B];
+  $('nmA').textContent=pa.name; $('nmB').textContent=pb.name;
+  const Ra=renderFig($('figA'),pa.s,'sch',GEO.MINI), Rb=renderFig($('figB'),pb.s,'sch',GEO.MINI);
+  // 上下の余白を切る（AとBは同じ縮尺・同じ高さにそろえる）
+  try{
+    const ba=$('figA').getBBox(), bb=$('figB').getBBox();
+    const y0=Math.min(ba.y,bb.y)-24, y1=Math.max(ba.y+ba.height,bb.y+bb.height)+24;
+    if(y1>y0+100) ['figA','figB'].forEach(id=>$(id).setAttribute('viewBox',`0 ${y0.toFixed(0)} 600 ${(y1-y0).toFixed(0)}`));
+  }catch(e){}
+  const ca=cells(pa.s,Ra), cb=cells(pb.s,Rb);
+  const thing=(pa.s.load==='motor'&&pb.s.load==='motor')?'モーター':(pa.s.load==='motor'||pb.s.load==='motor'?'電球・モーター':'電球ごとの電流（明るさ）');
+  $('cmpBody').innerHTML=
+    `<tr><th>電池全体の電圧<button class="q" data-term="volt" aria-label="電圧とは">？</button></th><td>${ca.v}</td><td>${cb.v}</td></tr>`+
+    `<tr><th>回路を流れる電流<button class="q" data-term="current" aria-label="電流とは">？</button></th><td>${ca.i}</td><td>${cb.i}</td></tr>`+
+    `<tr><th>${thing}</th><td class="ld">${ca.l}</td><td class="ld">${cb.l}</td></tr>`+
+    `<tr><th>電池の長持ち</th><td>${ca.life}</td><td>${cb.life}</td></tr>`;
+  $('sentence').innerHTML=sentence(Ra,Rb,pa,pb);
+  $('whyA').innerHTML=whyBox('A',pa,Ra); $('whyB').innerHTML=whyBox('B',pb,Rb);
+}
+
+/* ===== 下から出る画面 ===== */
+const sheet=$('sheet');
+function openSheet(title,html){ $('sheetTitle').innerHTML=title; $('sheetBody').innerHTML=html; sheet.hidden=false; $('sheetClose').focus(); }
+function closeSheet(){ sheet.hidden=true; delete figs.bigReal; delete figs.bigSch; }
+$('sheetClose').onclick=closeSheet;
+sheet.addEventListener('click',e=>{ if(e.target===sheet) closeSheet(); });
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&!sheet.hidden) closeSheet(); });
+function openPicker(which){
+  const html=GROUPS.map(g=>`<div class="grp">${g.name}</div><div class="plist">`+
+    g.list.map(p=>`<button type="button" data-p="${p[0]}" aria-pressed="${sel[which]===p[0]}"${g.danger?' class="dz"':''}>${p[1]}</button>`).join('')+'</div>').join('');
+  openSheet(`<span style="color:var(--c${which.toLowerCase()})">${which}</span> の回路をえらぶ`,html);
+  $('sheetBody').onclick=e=>{const b=e.target.closest('[data-p]'); if(!b) return; sel[which]=b.dataset.p; closeSheet(); render();};
+}
+function openBig(which){
+  const p=PAT[sel[which]];
+  openSheet(`<span style="color:var(--c${which.toLowerCase()})">${which}</span>：${p.name}`,
+    `<div class="big"><h3><ruby>実体図<rt>じったいず</rt></ruby></h3><svg id="bigReal" role="img" aria-label="実体図" style="background:var(--surface2)"></svg>`+
+    `<h3><ruby>回路図<rt>かいろず</rt></ruby></h3><svg id="bigSch" role="img" aria-label="回路図" style="background:var(--surface)"></svg>`+
+    `<p class="hint">黄色の点は電流の流れ（＋極から−極へ）で、速いほど電流が大きいことを表します。</p></div>`);
+  $('sheetBody').onclick=null;
+  renderFig($('bigReal'),p.s,'real',GEO.FULL); renderFig($('bigSch'),p.s,'sch',GEO.FULL);
+}
+document.querySelectorAll('[data-pick]').forEach(b=>b.onclick=()=>openPicker(b.dataset.pick));
+$('figA').onclick=()=>openBig('A'); $('figB').onclick=()=>openBig('B');
+document.addEventListener('click',e=>{const q=e.target.closest('.q[data-term]'); if(!q) return; const t=TERMS[q.dataset.term];
+  $('sheetBody').onclick=null; openSheet(t.t,`<section class="panel term">${t.u?`<p class="hint">${t.u}</p>`:''}${t.h}</section>`);});
+
+/* ===== 電流の点・モーターのアニメーション ===== */
+let last=performance.now();
+function frame(t){
+  const dt=Math.min(0.05,(t-last)/1000); last=t;
+  Object.values(figs).forEach(f=>{
+    if(!f.svg.isConnected) return;
+    const per=2200*f.K;
+    f.off=f.off.map((o,i)=>(o+f.segs[i]*dt)%per);
+    f.dots.forEach(p=>{ p.style.strokeDashoffset=(-f.off[+p.dataset.i]).toFixed(1); });
+    if(f.props.length&&f.omega){ f.ang=(f.ang+f.omega*dt)%360;
+      f.props.forEach(g=>g.setAttribute('transform',`rotate(${f.ang.toFixed(1)} ${g.dataset.cx} ${g.dataset.cy})`)); }
+  });
+  requestAnimationFrame(frame);
+}
+LabTabs();
+renderWords(); render(); requestAnimationFrame(frame);
+window.__denki={PAT,evaluate,sel,render};
+})();
+</script>
+</body>
+</html>
